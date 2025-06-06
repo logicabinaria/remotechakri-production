@@ -1,0 +1,21 @@
+# Cloudflare Pages configuration
+name = "remotechakri"
+compatibility_date = "2023-06-06"
+compatibility_flags = ["nodejs_compat"]
+
+[build]
+command = "npm run build"
+output_directory = ".next"
+
+[build.environment]
+NODE_VERSION = "18"
+
+[site]
+bucket = "./.next"
+entry-point = "."
+
+[env.production]
+NODE_ENV = "production"
+
+[env.preview]
+NODE_ENV = "development"

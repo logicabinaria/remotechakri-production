@@ -1,0 +1,28 @@
+[site]
+bucket = "./.next/static"
+entry-point = "."
+
+[build]
+command = "npm run build"
+watch_dir = "src"
+
+[build.upload]
+format = "service-worker"
+
+[env.production]
+name = "remotechakri-production"
+
+[env.staging]
+name = "remotechakri-staging"
+
+# Configure environment variables
+[vars]
+NEXT_PUBLIC_SUPABASE_URL = "https://hdgnnxzanpbpbrboifem.supabase.co"
+# Note: Sensitive variables like API keys should be set through Cloudflare dashboard
+# and not committed to version control
+
+# Configure caching
+[[kv_namespaces]]
+binding = "CACHE"
+id = "cache"
+preview_id = "cache-preview"

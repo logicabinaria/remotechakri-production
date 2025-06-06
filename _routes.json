@@ -1,0 +1,9 @@
+{
+  "version": 1,
+  "include": ["/*"],
+  "exclude": [
+    "/build/*",
+    "/node_modules/*",
+    "/_next/static/*"
+  ]
+}
