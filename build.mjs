@@ -24,6 +24,10 @@ async function build() {
     console.log('Installing dependencies...');
     exec('npm install critters --save-dev');
     
+    // Apply Edge Runtime fix to all dynamic routes
+    console.log('Applying Edge Runtime fix to dynamic routes...');
+    exec('node edge-runtime-fix.mjs');
+    
     // Build Next.js app with Cloudflare adapter
     console.log('Building Next.js application with Cloudflare adapter...');
     exec('npx @cloudflare/next-on-pages');
