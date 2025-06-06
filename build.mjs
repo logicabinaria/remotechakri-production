@@ -26,7 +26,7 @@ async function build() {
     
     // Apply Edge Runtime fix to all dynamic routes
     console.log('Applying Edge Runtime fix to dynamic routes...');
-    exec('node edge-runtime-fix.mjs');
+    exec('node fix-edge-runtime.mjs');
     
     // Build Next.js app with Cloudflare adapter
     console.log('Building Next.js application with Cloudflare adapter...');

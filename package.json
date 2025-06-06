@@ -13,8 +13,7 @@
     "pages:dev": "npx wrangler pages dev .vercel/output/static --compatibility-date=2023-06-06 --compatibility-flag=nodejs_compat",
     "cloudflare:build": "node build.mjs",
     "cloudflare:deploy": "node deploy-cloudflare.mjs",
-    "add-edge-runtime": "node add-edge-runtime.mjs",
-    "edge-runtime-fix": "node edge-runtime-fix.mjs"
+    "fix-edge-runtime": "node fix-edge-runtime.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.0.1",

@@ -7,8 +7,6 @@ const nextConfig = {
   experimental: {
     optimizeCss: false,
     optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],
-    // Set Edge Runtime as default for all routes
-    runtime: 'edge',
     serverActions: {
       bodySizeLimit: '2mb',
     },
