@@ -3,9 +3,9 @@ const nextConfig = {
   // Configure for Cloudflare Pages compatibility
   output: 'standalone',
   
-  // Optimize for Cloudflare's edge network
+  // Disable CSS optimization to avoid critters dependency issues
   experimental: {
-    optimizeCss: true,
+    optimizeCss: false,
     optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],
   },
   

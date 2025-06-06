@@ -1,28 +1,25 @@
-[site]
-bucket = "./.next/static"
-entry-point = "."
+# Cloudflare Pages configuration for Next.js
+name = "remotechakri"
+compatibility_date = "2023-06-06"
+compatibility_flags = ["nodejs_compat"]
 
+# Build configuration
 [build]
-command = "npm run build"
-watch_dir = "src"
+command = "npm install && npm run build"
 
-[build.upload]
-format = "service-worker"
+# Output directory configuration
+[site]
+pages_build_output_dir = ".next/standalone"
+assets_dir = ".next/static"
 
+# Environment variables
+[vars]
+NEXT_PUBLIC_SUPABASE_URL = "https://hdgnnxzanpbpbrboifem.supabase.co"
+# Note: Sensitive variables like API keys should be set through Cloudflare dashboard
+
+# Environment-specific configurations
 [env.production]
 name = "remotechakri-production"
 
 [env.staging]
 name = "remotechakri-staging"
-
-# Configure environment variables
-[vars]
-NEXT_PUBLIC_SUPABASE_URL = "https://hdgnnxzanpbpbrboifem.supabase.co"
-# Note: Sensitive variables like API keys should be set through Cloudflare dashboard
-# and not committed to version control
-
-# Configure caching
-[[kv_namespaces]]
-binding = "CACHE"
-id = "cache"
-preview_id = "cache-preview"
