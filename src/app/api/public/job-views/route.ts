@@ -1,3 +1,5 @@
+export const runtime = 'edge';
+
 import { NextRequest, NextResponse } from "next/server";
 import { recordJobView } from "@/lib/public/job-queries";
 import { cookies } from "next/headers";

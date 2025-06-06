@@ -5,7 +5,7 @@ compatibility_flags = ["nodejs_compat"]
 
 # Build configuration
 [build]
-command = "npm install && npm run build"
+command = "npm install && node fix-edge-runtime.mjs && npm run build"
 
 # Output directory configuration
 [site]
