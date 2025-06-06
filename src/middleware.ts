@@ -1,6 +1,8 @@
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
+export const runtime = 'experimental-edge';
+
 export async function middleware(request: NextRequest) {
   // Create a response object that we'll modify and return
   const response = NextResponse.next({
