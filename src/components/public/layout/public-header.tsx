@@ -44,11 +44,11 @@ export function PublicHeader() {
           {/* Right side actions */}
           <div className="hidden md:flex items-center space-x-4">
             <ThemeToggle />
-            <Link href="/admin">
+            {/* <Link href="/admin">
               <Button variant="outline" size="sm">
                 Admin Login
               </Button>
-            </Link>
+            </Link> */}
           </div>
 
           {/* Mobile menu button */}

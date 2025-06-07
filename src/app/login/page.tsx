@@ -68,13 +68,15 @@ export default function LoginPage() {
                     },
                   },
                 },
+                // Custom styles will be added via CSS
               }}
               theme={theme === 'dark' ? 'dark' : 'light'}
               providers={[]}
               redirectTo={typeof window !== 'undefined' ? `${window.location.origin}/admin` : '/admin'}
               onlyThirdPartyProviders={false}
-              magicLink={true}
+              magicLink={false}
               view="sign_in"
+              showLinks={false}
             />
           </CardContent>
         </Card>

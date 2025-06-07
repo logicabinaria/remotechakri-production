@@ -305,6 +305,25 @@ export default async function JobDetailsPage({ params }: { params: { slug: strin
                       </div>
                     </div>
                   )}
+                  
+                  {/* Related Tags Section */}
+                  {job.tags && job.tags.length > 0 && (
+                    <div className="flex items-start">
+                      <Tag className="h-5 w-5 text-gray-500 mr-3 mt-0.5" />
+                      <div>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">Related Tags</p>
+                        <div className="flex flex-wrap gap-2 mt-2">
+                          {job.tags.map((tag, index) => (
+                            <Link key={tag.id || index} href={`/tags/${tag.slug}`}>
+                              <Badge variant="secondary" className="px-2 py-0.5 text-xs hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+                                {tag.name}
+                              </Badge>
+                            </Link>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
                 
                 <div className="mt-6">

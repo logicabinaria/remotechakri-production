@@ -76,3 +76,10 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Hide unwanted auth UI links */
+.supabase-auth-ui_ui-anchor[href*="magic-link"],
+.supabase-auth-ui_ui-anchor[href*="forgot-password"],
+.supabase-auth-ui_ui-anchor[href*="sign-up"] {
+  display: none !important;
+}
