@@ -4,6 +4,7 @@ import "./globals.css";
 import SupabaseProvider from "@/components/providers/supabase-provider";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { ThemeScript } from "@/components/theme-script";
+import { Toaster } from "@/components/ui/toaster";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -37,6 +38,7 @@ export default function RootLayout({
         <ThemeProvider defaultTheme="light" storageKey="remotechakri-theme">
           <SupabaseProvider>
             {children}
+            <Toaster />
           </SupabaseProvider>
         </ThemeProvider>
       </body>

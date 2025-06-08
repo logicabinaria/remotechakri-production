@@ -132,14 +132,16 @@ export async function getLatestJobs(options: GetLatestJobsOptions = {}): Promise
  * Fetch a single job by slug with related data
  */
 export async function getJobBySlug(slug: string): Promise<JobWithRelations | null> {
-  // Fetch the job with its direct relations
+  // Fetch the job with its direct relations including tags
+  // Now that RLS policies are fixed, we can fetch tags directly in a single query
   const { data: job, error } = await supabase
     .from('jobs')
     .select(`
       *,
       category:categories(*),
       location:locations(*),
-      job_type:job_types(*)
+      job_type:job_types(*),
+      tags:job_tags(tags(id, name, slug))
     `)
     .eq('slug', slug)
     .eq('is_published', true)
@@ -153,117 +155,36 @@ export async function getJobBySlug(slug: string): Promise<JobWithRelations | nul
 
   if (!job) return null;
 
-  try {
-    console.log(`\n=== DEBUG: Starting tag fetch for job ${job.id} ===`);
-    console.log(`Job title: ${job.title}`);
-    console.log(`Job slug: ${job.slug}`);
-    
-    // Use the database function that implements the exact SQL query provided by the user
-    // This is more efficient and reliable than complex Supabase client queries
-    console.log(`Attempting RPC call: get_job_tags with job_uuid: ${job.id}`);
-    const { data: tagData, error: tagsError } = await supabase
-      .rpc('get_job_tags', { job_uuid: job.id });
-
-    console.log(`RPC Response - Data:`, tagData);
-    console.log(`RPC Response - Error:`, tagsError);
-
-    if (tagsError) {
-      console.error(`❌ Error fetching tags for job ${job.id}:`, tagsError);
-      console.log(`🔄 Attempting fallback query...`);
-      
-      // Fallback to direct query if RPC fails
-      const { data: fallbackTags, error: fallbackError } = await supabase
-        .from('job_tags')
-        .select(`
-          tags (
-            id,
-            name,
-            slug
-          )
-        `)
-        .eq('job_id', job.id);
-      
-      console.log(`Fallback Query - Data:`, fallbackTags);
-      console.log(`Fallback Query - Error:`, fallbackError);
-      
-      if (fallbackError) {
-        console.error(`❌ Fallback query also failed for job ${job.id}:`, fallbackError);
-        console.log(`=== DEBUG: Returning job with empty tags ===\n`);
-        return {
-          ...job,
-          tags: []
-        };
-      }
-      
-      // Process fallback data
-      console.log(`Processing fallback data...`);
-      const fallbackExtractedTags = (fallbackTags || [])
-        .map(item => {
-          console.log(`Processing fallback item:`, item);
-          const tag = item.tags;
-          if (tag && typeof tag === 'object' && 'id' in tag && 'name' in tag && 'slug' in tag) {
-            const processedTag = {
-              id: String(tag.id),
-              name: String(tag.name),
-              slug: String(tag.slug)
-            };
-            console.log(`✅ Processed fallback tag:`, processedTag);
-            return processedTag;
-          }
-          console.log(`❌ Invalid fallback tag structure:`, tag);
-          return null;
-        })
-        .filter(Boolean) as Array<{id: string, name: string, slug: string}>;
-      
-      console.log(`Final fallback tags:`, fallbackExtractedTags);
-      console.log(`=== DEBUG: Returning job with ${fallbackExtractedTags.length} fallback tags ===\n`);
-      return {
-        ...job,
-        tags: fallbackExtractedTags
-      };
-    }
-
-    // If no tags found, return job with empty tags array
-    if (!tagData || tagData.length === 0) {
-      console.log(`⚠️ No tags found for job ${job.id}`);
-      console.log(`TagData is null/undefined:`, !tagData);
-      console.log(`TagData length is 0:`, tagData && tagData.length === 0);
-      console.log(`=== DEBUG: Returning job with empty tags ===\n`);
-      return {
-        ...job,
-        tags: []
-      };
-    }
-
-    // The RPC function returns the tags directly in the expected format
-    console.log(`✅ RPC returned ${tagData.length} tags. Processing...`);
-    const extractedTags = tagData.map((tag: { id: number | string, name: string, slug: string }, index: number) => {
-      console.log(`Processing tag ${index + 1}:`, tag);
-      const processedTag = {
-        id: String(tag.id),
-        name: String(tag.name),
-        slug: String(tag.slug)
-      };
-      console.log(`✅ Processed tag ${index + 1}:`, processedTag);
-      return processedTag;
-    });
-
-    console.log(`🎉 Successfully found ${extractedTags.length} tags for job ${job.id}:`, extractedTags);
-    console.log(`=== DEBUG: Returning job with ${extractedTags.length} tags ===\n`);
-
-    // Return the job with all its relations including tags
-    return {
-      ...job,
-      tags: extractedTags
-    };
-  } catch (err) {
-    console.error(`Unexpected error fetching tags for job ${job.id}:`, err);
-    // Return job without tags on unexpected error
-    return {
-      ...job,
-      tags: []
-    };
+  // Define interfaces for the tag data structure
+  interface TagData {
+    id: string | number;
+    name: string;
+    slug: string;
   }
+
+  interface TagItem {
+    tags: TagData;
+  }
+
+  // We need to handle potentially undefined or null items in the array
+  type JobTagItem = TagItem | Record<string, unknown> | null | undefined;
+
+  // Process tags from the nested structure
+  // The structure is job.tags = [{ tags: { id, name, slug } }, ...]
+  const processedTags = job.tags
+    ?.filter((item: JobTagItem): item is TagItem => 
+      !!item && 'tags' in item && !!item.tags)
+    .map((item: TagItem) => ({
+      id: String(item.tags.id || ''),
+      name: String(item.tags.name || ''),
+      slug: String(item.tags.slug || '')
+    })) || [];
+
+  // Return the job with processed tags
+  return {
+    ...job,
+    tags: processedTags
+  };
 }
 
 /**

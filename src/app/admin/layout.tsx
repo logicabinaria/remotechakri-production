@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSupabase } from "@/components/providers/supabase-provider";
 import { Button } from "@/components/ui/button";
-import { Building, Home, LogOut, Menu, Tag, MapPin, Briefcase, BarChart } from "lucide-react";
+import { Building, Home, LogOut, Menu, Tag, MapPin, Briefcase, BarChart, MessageCircle } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
@@ -30,6 +30,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     { href: "/admin/locations", label: "Locations", icon: MapPin },
     { href: "/admin/tags", label: "Tags", icon: Tag },
     { href: "/admin/analytics", label: "Analytics", icon: BarChart },
+    { href: "/admin/whatsapp-logs", label: "WhatsApp Logs", icon: MessageCircle },
   ];
 
   return (

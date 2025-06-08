@@ -26,6 +26,8 @@ import { getJobBySlug, getSimilarJobs } from '@/lib/public/job-queries';
 import { createDynamicMetadata } from '@/components/public/seo/metadata';
 import { JobCard } from '@/components/public/jobs/job-card';
 import { JobViewTracker } from '@/components/public/jobs/job-view-tracker';
+import { JobBookmarkButton } from '@/components/public/jobs/job-bookmark-button';
+import { JobStatusTracker } from '@/components/public/jobs/job-status-tracker';
 
 // Generate dynamic metadata for SEO
 export async function generateMetadata({ params }: { params: { slug: string } }) {
@@ -193,17 +195,25 @@ export default async function JobDetailsPage({ params }: { params: { slug: strin
               
               <Separator className="my-8" />
               
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Button className="flex-1" asChild>
-                  <a href={job.apply_url || '#'} target="_blank" rel="noopener noreferrer">
-                    Apply Now
-                    <ExternalLink className="ml-2 h-4 w-4" />
-                  </a>
-                </Button>
+              <div className="flex flex-col gap-4">
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <Button className="flex-1" asChild>
+                    <a href={job.apply_url || '#'} target="_blank" rel="noopener noreferrer">
+                      Apply Now
+                      <ExternalLink className="ml-2 h-4 w-4" />
+                    </a>
+                  </Button>
+                  
+                  <JobBookmarkButton 
+                    jobId={job.id} 
+                    variant="outline" 
+                    className="flex-1"
+                    showText={true}
+                  />
+                </div>
                 
-                <Button variant="outline" className="flex-1">
-                  Save Job
-                </Button>
+                {/* Job status tracker for logged-in users */}
+                <JobStatusTracker jobId={job.id} />
               </div>
             </div>
             
