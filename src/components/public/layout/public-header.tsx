@@ -1,11 +1,13 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useState, useEffect } from "react";
-import { Menu, X, User, Home, LogOut, Settings, Bookmark, Eye } from "lucide-react";
+import { Menu, X, User, Home, LogOut, Settings, Bookmark, Eye, Briefcase, Grid, MapPin, LogIn, UserPlus } from "lucide-react";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { useSupabase } from "@/components/providers/supabase-provider";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,7 +15,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 export function PublicHeader() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -66,9 +67,25 @@ export function PublicHeader() {
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           {/* Logo */}
-          <Link href="/" className="flex items-center space-x-2">
-            <span className="text-xl font-bold text-primary">RemoteChakri</span>
-            <span className="text-sm font-medium text-gray-500 dark:text-gray-400">.com</span>
+          <Link href="/" className="flex items-center">
+            <div className="relative h-8 w-40">
+              <Image 
+                src={process.env.NEXT_PUBLIC_LOGO_DARK_URL || ''}
+                alt="RemoteChakri.com"
+                fill
+                sizes="300px"
+                className="hidden dark:block object-contain"
+                priority
+              />
+              <Image 
+                src={process.env.NEXT_PUBLIC_LOGO_LIGHT_URL || ''}
+                alt="RemoteChakri.com"
+                fill
+                sizes="300px"
+                className="block dark:hidden object-contain"
+                priority
+              />
+            </div>
           </Link>
 
           {/* Desktop Navigation */}
@@ -81,21 +98,21 @@ export function PublicHeader() {
             </Link>
             <Link 
               href="/jobs" 
-              className="text-gray-600 hover:text-primary dark:text-gray-300 dark:hover:text-primary transition-colors"
+              className="text-gray-600 hover:text-primary dark:text-gray-300 dark:hover:text-primary transition-colors flex items-center gap-1"
             >
-              Browse Jobs
+              <Briefcase className="h-4 w-4" /> Browse Jobs
             </Link>
             <Link 
               href="/categories" 
-              className="text-gray-600 hover:text-primary dark:text-gray-300 dark:hover:text-primary transition-colors"
+              className="text-gray-600 hover:text-primary dark:text-gray-300 dark:hover:text-primary transition-colors flex items-center gap-1"
             >
-              Categories
+              <Grid className="h-4 w-4" /> Categories
             </Link>
             <Link 
               href="/locations" 
-              className="text-gray-600 hover:text-primary dark:text-gray-300 dark:hover:text-primary transition-colors"
+              className="text-gray-600 hover:text-primary dark:text-gray-300 dark:hover:text-primary transition-colors flex items-center gap-1"
             >
-              Locations
+              <MapPin className="h-4 w-4" /> Locations
             </Link>
           </nav>
 
@@ -144,11 +161,18 @@ export function PublicHeader() {
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              <Link href="/login">
-                <Button variant="outline" size="sm">
-                  Login
-                </Button>
-              </Link>
+              <div className="flex items-center gap-2">
+                <Link href="/login">
+                  <Button variant="outline" size="sm" className="flex items-center gap-1">
+                    <LogIn className="h-4 w-4" /> Login
+                  </Button>
+                </Link>
+                <Link href="/register">
+                  <Button variant="default" size="sm" className="flex items-center gap-1">
+                    <UserPlus className="h-4 w-4" /> Register
+                  </Button>
+                </Link>
+              </div>
             )}
           </div>
 
@@ -171,79 +195,70 @@ export function PublicHeader() {
 
         {/* Mobile menu */}
         {mobileMenuOpen && (
-          <div className="md:hidden pt-4 pb-3 border-t border-gray-200 dark:border-gray-700 mt-4">
+          <div className="md:hidden absolute top-full left-0 right-0 bg-white dark:bg-gray-900 shadow-lg p-4 z-50">
             <nav className="flex flex-col space-y-4">
               <Link 
                 href="/" 
-                className="text-gray-600 hover:text-primary dark:text-gray-300 dark:hover:text-primary transition-colors flex items-center gap-1"
+                className="text-gray-600 hover:text-primary dark:text-gray-300 dark:hover:text-primary transition-colors flex items-center gap-2"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 <Home className="h-4 w-4" /> Home
               </Link>
               <Link 
                 href="/jobs" 
-                className="text-gray-600 hover:text-primary dark:text-gray-300 dark:hover:text-primary transition-colors"
+                className="text-gray-600 hover:text-primary dark:text-gray-300 dark:hover:text-primary transition-colors flex items-center gap-2"
                 onClick={() => setMobileMenuOpen(false)}
               >
-                Browse Jobs
+                <Briefcase className="h-4 w-4" /> Browse Jobs
               </Link>
               <Link 
                 href="/categories" 
-                className="text-gray-600 hover:text-primary dark:text-gray-300 dark:hover:text-primary transition-colors"
+                className="text-gray-600 hover:text-primary dark:text-gray-300 dark:hover:text-primary transition-colors flex items-center gap-2"
                 onClick={() => setMobileMenuOpen(false)}
               >
-                Categories
+                <Grid className="h-4 w-4" /> Categories
               </Link>
               <Link 
                 href="/locations" 
-                className="text-gray-600 hover:text-primary dark:text-gray-300 dark:hover:text-primary transition-colors"
+                className="text-gray-600 hover:text-primary dark:text-gray-300 dark:hover:text-primary transition-colors flex items-center gap-2"
                 onClick={() => setMobileMenuOpen(false)}
               >
-                Locations
+                <MapPin className="h-4 w-4" /> Locations
               </Link>
-              
               {isAuthenticated ? (
                 <>
                   <Link 
                     href="/dashboard" 
-                    className="text-gray-600 hover:text-primary dark:text-gray-300 dark:hover:text-primary transition-colors flex items-center gap-1"
+                    className="text-gray-600 hover:text-primary dark:text-gray-300 dark:hover:text-primary transition-colors flex items-center gap-2"
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     <User className="h-4 w-4" /> Dashboard
                   </Link>
                   <Link 
-                    href="/dashboard/settings" 
-                    className="text-gray-600 hover:text-primary dark:text-gray-300 dark:hover:text-primary transition-colors flex items-center gap-1"
+                    href="/api/auth/signout" 
+                    className="text-destructive hover:text-destructive/80 transition-colors flex items-center gap-2"
                     onClick={() => setMobileMenuOpen(false)}
                   >
-                    <Settings className="h-4 w-4" /> Profile
-                  </Link>
-                  <Link 
-                    href="/dashboard/my-jobs" 
-                    className="text-gray-600 hover:text-primary dark:text-gray-300 dark:hover:text-primary transition-colors flex items-center gap-1"
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    <Bookmark className="h-4 w-4" /> My Saved Jobs
-                  </Link>
-                  <Link 
-                    href="/dashboard/viewed-jobs" 
-                    className="text-gray-600 hover:text-primary dark:text-gray-300 dark:hover:text-primary transition-colors flex items-center gap-1"
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    <Eye className="h-4 w-4" /> Jobs Viewed
-                  </Link>
-                  <Link href="/api/auth/signout" onClick={() => setMobileMenuOpen(false)}>
-                    <Button variant="outline" size="sm" className="w-full text-destructive border-destructive hover:bg-destructive/10">
-                      <LogOut className="h-4 w-4 mr-2" /> Logout
-                    </Button>
+                    <LogOut className="h-4 w-4" /> Logout
                   </Link>
                 </>
               ) : (
-                <Link href="/login" onClick={() => setMobileMenuOpen(false)}>
-                  <Button variant="outline" size="sm" className="w-full">
-                    Login
-                  </Button>
-                </Link>
+                <div className="flex flex-col space-y-2">
+                  <Link 
+                    href="/login" 
+                    className="text-primary hover:text-primary/80 transition-colors flex items-center gap-2"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <LogIn className="h-4 w-4" /> Login
+                  </Link>
+                  <Link 
+                    href="/register" 
+                    className="text-primary hover:text-primary/80 transition-colors flex items-center gap-2"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <UserPlus className="h-4 w-4" /> Register
+                  </Link>
+                </div>
               )}
             </nav>
           </div>

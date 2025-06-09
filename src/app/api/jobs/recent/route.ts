@@ -60,8 +60,35 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ jobs: [], total: 0 }, { status: 500 });
   }
   
+  // Process the nested tag structure before returning
+  const processedJobs = data?.map(job => {
+    // Define the interface for the nested tag structure
+    interface TagItem {
+      tag: {
+        id: string;
+        name: string;
+        slug: string;
+      };
+    }
+
+    // Process tags from the nested structure
+    const processedTags = job.tags
+      ?.filter((item: unknown): item is TagItem => 
+        !!item && typeof item === 'object' && item !== null && 'tag' in item && !!item.tag)
+      .map((item: TagItem) => ({
+        id: String(item.tag.id || ''),
+        name: String(item.tag.name || ''),
+        slug: String(item.tag.slug || '')
+      })) || [];
+
+    return {
+      ...job,
+      tags: processedTags
+    };
+  }) || [];
+
   return NextResponse.json({ 
-    jobs: data || [], 
+    jobs: processedJobs, 
     total: count || 0 
   });
 }

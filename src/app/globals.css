@@ -12,57 +12,76 @@
 
 @layer base {
   :root {
+    /* Base colors */
     --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --foreground: 213 45% 22%; /* Slightly softened version of brand color for text */
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 213 45% 22%;
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --popover-foreground: 213 45% 22%;
+    
+    /* Brand colors */
+    --primary: 29 89% 61%; /* Orange #f48e41 */
+    --primary-foreground: 0 0% 100%; /* White text on orange */
+    --secondary: 213 45% 22%; /* Navy blue #1d3557 */
+    --secondary-foreground: 0 0% 100%; /* White text on navy */
+    
+    /* Supporting colors */
     --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --muted-foreground: 213 25% 40%; /* Lighter navy for muted text */
+    --accent: 29 89% 96%; /* Very light orange for accent backgrounds */
+    --accent-foreground: 29 89% 30%; /* Darker orange for accent text */
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
-    --chart-1: 12 76% 61%;
-    --chart-2: 173 58% 39%;
-    --chart-3: 197 37% 24%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 27 87% 67%;
+    
+    /* Border and input colors */
+    --border: 213 25% 90%; /* Light navy for borders */
+    --input: 213 25% 90%;
+    --ring: 29 89% 61%; /* Orange for focus rings */
+    
+    /* Chart colors */
+    --chart-1: 29 89% 61%; /* Orange */
+    --chart-2: 213 45% 22%; /* Navy */
+    --chart-3: 213 30% 40%; /* Lighter navy */
+    --chart-4: 29 70% 50%; /* Darker orange */
+    --chart-5: 213 20% 60%; /* Very light navy */
+    
     --radius: 0.5rem;
   }
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    /* Base colors */
+    --background: 213 45% 10%; /* Dark navy background */
+    --foreground: 0 0% 95%; /* Light text */
+    --card: 213 45% 12%; /* Slightly lighter navy for cards */
+    --card-foreground: 0 0% 95%;
+    --popover: 213 45% 12%;
+    --popover-foreground: 0 0% 95%;
+    
+    /* Brand colors */
+    --primary: 29 89% 61%; /* Keep orange as primary */
+    --primary-foreground: 0 0% 100%; /* White text on orange */
+    --secondary: 213 40% 30%; /* Lighter navy for secondary */
+    --secondary-foreground: 0 0% 100%;
+    
+    /* Supporting colors */
+    --muted: 213 45% 18%; /* Darker navy for muted backgrounds */
+    --muted-foreground: 213 25% 65%; /* Light navy for muted text */
+    --accent: 29 50% 25%; /* Dark orange for accent backgrounds */
+    --accent-foreground: 29 89% 80%; /* Light orange for accent text */
     --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
+    --destructive-foreground: 0 0% 95%;
+    
+    /* Border and input colors */
+    --border: 213 45% 25%; /* Visible navy borders */
+    --input: 213 45% 25%;
+    --ring: 29 89% 61%; /* Orange for focus rings */
+    
+    /* Chart colors */
+    --chart-1: 29 89% 61%; /* Orange */
+    --chart-2: 213 45% 60%; /* Light navy */
+    --chart-3: 29 70% 40%; /* Dark orange */
+    --chart-4: 213 30% 80%; /* Very light navy */
+    --chart-5: 29 50% 80%; /* Light orange */
   }
 }
 
@@ -82,4 +101,23 @@
 .supabase-auth-ui_ui-anchor[href*="forgot-password"],
 .supabase-auth-ui_ui-anchor[href*="sign-up"] {
   display: none !important;
+}
+
+/* Fix sign-in button visibility in light mode */
+.supabase-auth-ui_ui-container [data-theme="light"] button[type="submit"],
+.supabase-auth-ui_ui-container button[type="submit"],
+.sbui-btn-primary,
+.sbui-btn {
+  background-color: rgb(var(--primary)) !important;
+  color: white !important;
+  border: none !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+.supabase-auth-ui_ui-container [data-theme="light"] button[type="submit"]:hover,
+.supabase-auth-ui_ui-container button[type="submit"]:hover,
+.sbui-btn-primary:hover,
+.sbui-btn:hover {
+  background-color: rgb(var(--primary) / 0.9) !important;
 }

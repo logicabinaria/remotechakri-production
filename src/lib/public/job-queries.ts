@@ -15,7 +15,8 @@ export async function getFeaturedJobs(limit = 6): Promise<JobWithRelations[]> {
       *,
       category:categories(*),
       location:locations(*),
-      job_type:job_types(*)
+      job_type:job_types(*),
+      tags:job_tags(tags(id, name, slug))
     `)
     .eq('is_published', true)
     .eq('is_featured', true)
@@ -29,7 +30,36 @@ export async function getFeaturedJobs(limit = 6): Promise<JobWithRelations[]> {
     return [];
   }
 
-  return data || [];
+  // Process tags for each job
+  const jobsWithProcessedTags = data?.map(job => {
+    // Define interfaces for the tag data structure
+    interface TagData {
+      id: string | number;
+      name: string;
+      slug: string;
+    }
+
+    interface TagItem {
+      tags: TagData;
+    }
+
+    // Process tags from the nested structure
+    const processedTags = job.tags
+      ?.filter((item: unknown): item is TagItem => 
+        !!item && typeof item === 'object' && item !== null && 'tags' in item && !!item.tags)
+      .map((item: TagItem) => ({
+        id: String(item.tags.id || ''),
+        name: String(item.tags.name || ''),
+        slug: String(item.tags.slug || '')
+      })) || [];
+
+    return {
+      ...job,
+      tags: processedTags
+    };
+  }) || [];
+
+  return jobsWithProcessedTags;
 }
 
 /**
@@ -145,7 +175,7 @@ export async function getLatestJobs(options: GetLatestJobsOptions = {}): Promise
   
   totalCount = count || 0;
 
-  // Start building the query
+  // Construct the query
   let query = supabase
     .from('jobs')
     .select(`
@@ -153,8 +183,8 @@ export async function getLatestJobs(options: GetLatestJobsOptions = {}): Promise
       category:categories(*),
       location:locations(*),
       job_type:job_types(*),
-      tags:job_tags(tags(*))
-    `)
+      tags:job_tags(tags(id, name, slug))
+    `, { count: 'exact' })
     .eq('is_published', true)
     .is('deleted_at', null)
     .or(`expires_at.is.null,expires_at.gt.${new Date().toISOString()}`);
@@ -239,8 +269,37 @@ export async function getLatestJobs(options: GetLatestJobsOptions = {}): Promise
     return { jobs: [], total: 0 };
   }
 
+  // Process tags for each job
+  const jobsWithProcessedTags = data?.map(job => {
+    // Define interfaces for the tag data structure
+    interface TagData {
+      id: string | number;
+      name: string;
+      slug: string;
+    }
+
+    interface TagItem {
+      tags: TagData;
+    }
+
+    // Process tags from the nested structure
+    const processedTags = job.tags
+      ?.filter((item: unknown): item is TagItem => 
+        !!item && typeof item === 'object' && item !== null && 'tags' in item && !!item.tags)
+      .map((item: TagItem) => ({
+        id: String(item.tags.id || ''),
+        name: String(item.tags.name || ''),
+        slug: String(item.tags.slug || '')
+      })) || [];
+
+    return {
+      ...job,
+      tags: processedTags
+    };
+  }) || [];
+
   return { 
-    jobs: data || [], 
+    jobs: jobsWithProcessedTags, 
     total: totalCount 
   };
 }

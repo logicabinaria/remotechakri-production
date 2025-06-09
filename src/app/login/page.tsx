@@ -3,15 +3,23 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
+import { useTheme } from "@/components/providers/theme-provider";
+import { useSupabase } from "@/components/providers/supabase-provider";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Auth } from "@supabase/auth-ui-react";
 import { ThemeSupa } from "@supabase/auth-ui-shared";
-import { Session } from "@supabase/supabase-js";
-import { useSupabase } from "@/components/providers/supabase-provider";
-import { useTheme } from "@/components/providers/theme-provider";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ThemeToggle } from "@/components/ui/theme-toggle";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { CheckCircle2 } from "lucide-react";
+import { ArrowLeft, CheckCircle2 } from "lucide-react";
+import { Session } from "@supabase/supabase-js";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -133,13 +141,36 @@ export default function LoginPage() {
   }, [router, supabase]);
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div 
+      className="flex items-center justify-center min-h-screen bg-cover bg-center" 
+      style={{ backgroundImage: `url(${process.env.NEXT_PUBLIC_LOGIN_BG_URL})` }}
+    >
+      <div className="absolute top-4 right-4">
+        <ThemeToggle />
+      </div>
       <div className="w-full max-w-md px-4 relative">
-        <div className="absolute top-4 right-4">
-          <ThemeToggle />
-        </div>
-        <Card>
-          <CardHeader className="space-y-1">
+        <Card className="backdrop-blur-sm bg-white/90 dark:bg-gray-900/90 border-0 shadow-xl">
+          <CardHeader className="space-y-4">
+            <div className="flex justify-center">
+              <div className="relative h-12 w-48">
+                <Image 
+                  src={process.env.NEXT_PUBLIC_LOGO_DARK_URL || ''}
+                  alt="RemoteChakri.com"
+                  fill
+                  sizes="192px"
+                  className="hidden dark:block object-contain"
+                  priority
+                />
+                <Image 
+                  src={process.env.NEXT_PUBLIC_LOGO_LIGHT_URL || ''}
+                  alt="RemoteChakri.com"
+                  fill
+                  sizes="192px"
+                  className="block dark:hidden object-contain"
+                  priority
+                />
+              </div>
+            </div>
             <CardTitle className="text-2xl text-center">Login</CardTitle>
             <CardDescription className="text-center">
               Enter your email and password to login to your account
@@ -156,6 +187,19 @@ export default function LoginPage() {
             </div>
           )}
           <CardContent>
+            {/* Custom style to fix button visibility */}
+            <style jsx global>{`
+              .supabase-auth-ui_ui-button {
+                background-color: #f48e41 !important;
+                color: white !important;
+                opacity: 1 !important;
+                visibility: visible !important;
+              }
+              .supabase-auth-ui_ui-button:hover {
+                background-color: #e07d30 !important;
+              }
+            `}</style>
+            
             <Auth
               supabaseClient={supabase}
               appearance={{ 
@@ -188,19 +232,25 @@ export default function LoginPage() {
                   Forgot your password?
                 </Link>
               </div>
-              <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                  Don&apos;t have an account?{" "}
-                  <Link 
-                    href="/register" 
-                    className="text-primary hover:underline"
-                  >
-                    Sign up
-                  </Link>
-                </p>
-              </div>
             </div>
           </CardContent>
+          <CardFooter className="flex flex-col space-y-4">
+            <div className="text-center text-sm text-gray-600 dark:text-gray-400">
+              Don&apos;t have an account?{" "}
+              <Link href="/register" className="text-primary hover:underline">
+                Register
+              </Link>
+            </div>
+            <div className="flex justify-center w-full">
+              <Link 
+                href="/" 
+                className="flex items-center text-sm text-gray-600 hover:text-primary dark:text-gray-400 dark:hover:text-primary"
+              >
+                <ArrowLeft className="mr-1 h-4 w-4" />
+                Back to Website
+              </Link>
+            </div>
+          </CardFooter>
         </Card>
       </div>
     </div>

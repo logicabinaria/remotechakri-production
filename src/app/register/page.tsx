@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { useSupabase } from "@/components/providers/supabase-provider";
 import { useTheme } from "@/components/providers/theme-provider";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
@@ -12,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle, Loader2 } from "lucide-react";
+import { AlertCircle, ArrowLeft, Loader2 } from "lucide-react";
 
 // Country codes for phone numbers
 const countryCodes = [
@@ -63,28 +64,18 @@ export default function RegisterPage() {
     setLoading(true);
     
     try {
-      // Validate form
-      if (!fullName.trim()) {
-        throw new Error("Please enter your full name");
-      }
-      
-      if (!email.trim()) {
-        throw new Error("Please enter your email address");
+      // Validate inputs
+      if (!fullName || !email || !password || !phoneNumber) {
+        throw new Error("All fields are required");
       }
       
       if (password.length < 6) {
         throw new Error("Password must be at least 6 characters");
       }
       
-      if (!phoneNumber.trim()) {
-        throw new Error("Please enter your phone number");
-      }
-      
-      // Clean and validate phone number
-      let cleanPhoneNumber = phoneNumber.trim();
-      
-      // Remove any spaces, dashes, or parentheses
-      cleanPhoneNumber = cleanPhoneNumber.replace(/[\s\-\(\)]/g, '');
+      // Format phone number
+      // Remove leading zero if present when using country code and remove any spaces, dashes, or parentheses
+      const cleanPhoneNumber = phoneNumber.trim().replace(/^0+/, '').replace(/[\s\-\(\)]/g, '');
       
       // Check if the user already included a country code (starts with + or the selected country code)
       if (cleanPhoneNumber.startsWith('+') || countryCode.substring(1).split('').every(digit => cleanPhoneNumber.startsWith(digit))) {
@@ -96,9 +87,9 @@ export default function RegisterPage() {
         throw new Error("Phone number should only contain digits");
       }
       
-      // Format phone number - remove the + from country code
-      const cleanCountryCode = countryCode.startsWith('+') ? countryCode.substring(1) : countryCode;
-      const formattedPhoneNumber = `${cleanCountryCode}${cleanPhoneNumber}`;
+      // Format phone number - ensure we're using the country code without the + symbol
+      const formattedCountryCode = countryCode.startsWith('+') ? countryCode.substring(1) : countryCode;
+      const formattedPhoneNumber = `${formattedCountryCode}${cleanPhoneNumber}`;
       
       // Call server-side registration API
       const response = await fetch('/api/register', {
@@ -136,13 +127,36 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div 
+      className="flex items-center justify-center min-h-screen bg-cover bg-center" 
+      style={{ backgroundImage: `url(${process.env.NEXT_PUBLIC_REGISTER_BG_URL})` }}
+    >
+      <div className="absolute top-4 right-4">
+        <ThemeToggle />
+      </div>
       <div className="w-full max-w-md px-4 relative">
-        <div className="absolute top-4 right-4">
-          <ThemeToggle />
-        </div>
-        <Card>
-          <CardHeader className="space-y-1">
+        <Card className="backdrop-blur-sm bg-white/90 dark:bg-gray-900/90 border-0 shadow-xl">
+          <CardHeader className="space-y-4">
+            <div className="flex justify-center">
+              <div className="relative h-12 w-48">
+                <Image 
+                  src={process.env.NEXT_PUBLIC_LOGO_DARK_URL || ''}
+                  alt="RemoteChakri.com"
+                  fill
+                  sizes="192px"
+                  className="hidden dark:block object-contain"
+                  priority
+                />
+                <Image 
+                  src={process.env.NEXT_PUBLIC_LOGO_LIGHT_URL || ''}
+                  alt="RemoteChakri.com"
+                  fill
+                  sizes="192px"
+                  className="block dark:hidden object-contain"
+                  priority
+                />
+              </div>
+            </div>
             <CardTitle className="text-2xl font-bold text-center">Create an Account</CardTitle>
             <CardDescription className="text-center">
               Register to find remote jobs on RemoteChakri.com
@@ -247,7 +261,7 @@ export default function RegisterPage() {
               </Button>
             </form>
           </CardContent>
-          <CardFooter>
+          <CardFooter className="flex flex-col space-y-4">
             <p className="text-sm text-center w-full text-gray-600 dark:text-gray-400">
               Already have an account?{" "}
               <Link 
@@ -257,6 +271,15 @@ export default function RegisterPage() {
                 Sign in
               </Link>
             </p>
+            <div className="flex justify-start w-full">
+              <Link 
+                href="/" 
+                className="flex items-center text-sm text-gray-600 hover:text-primary dark:text-gray-400 dark:hover:text-primary"
+              >
+                <ArrowLeft className="mr-1 h-4 w-4" />
+                Back to Website
+              </Link>
+            </div>
           </CardFooter>
         </Card>
       </div>
