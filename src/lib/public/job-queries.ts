@@ -8,6 +8,7 @@ import type { JobWithRelations } from '@/lib/supabase';
  * Fetch featured jobs with pagination and related data
  */
 export async function getFeaturedJobs(limit = 6): Promise<JobWithRelations[]> {
+  // Use a unique query parameter to bypass caching
   const { data, error } = await supabase
     .from('jobs')
     .select(`

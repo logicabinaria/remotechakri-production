@@ -1,6 +1,6 @@
-// Revalidate the page every 5 minutes (300 seconds)
-// This provides a good balance between fresh data and performance
-export const revalidate = 300;
+// Force dynamic rendering to ensure fresh data on every request
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 import { PublicLayout } from "@/components/public/layout/public-layout";
 import { getFeaturedJobs } from "@/lib/public/job-queries";

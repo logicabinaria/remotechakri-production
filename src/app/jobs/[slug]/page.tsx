@@ -1,5 +1,9 @@
 export const runtime = 'edge';
 
+// Force dynamic rendering to ensure fresh data on every request
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
