@@ -7,22 +7,26 @@ export const revalidate = 60; // Revalidate every minute
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { format } from 'date-fns';
+import { formatDistanceToNow } from 'date-fns';
 import { 
+  MapPin, 
+  Briefcase, 
   Building, 
   Calendar, 
-  Clock, 
-  ExternalLink, 
-  MapPin, 
-  Share2, 
+  DollarSign, 
   Tag, 
-  Briefcase,
-  DollarSign,
-  ArrowLeft
+  ExternalLink, 
+  ArrowLeft,
+  Share2,
+  Facebook,
+  Twitter,
+  Linkedin,
+  MessageCircle
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Separator } from '@/components/ui/separator';
 import { PublicLayout } from '@/components/public/layout/public-layout';
 import { JobStructuredData } from '@/components/public/seo/job-structured-data';
@@ -32,6 +36,7 @@ import { JobCard } from '@/components/public/jobs/job-card';
 import { JobViewTracker } from '@/components/public/jobs/job-view-tracker';
 import { JobBookmarkButton } from '@/components/public/jobs/job-bookmark-button';
 import { JobStatusTracker } from '@/components/public/jobs/job-status-tracker';
+import { JobShare } from '@/components/public/jobs/job-share';
 
 // Generate dynamic metadata for SEO
 export async function generateMetadata({ params }: { params: { slug: string } }) {
@@ -77,9 +82,8 @@ export default async function JobDetailsPage({ params }: { params: { slug: strin
   // Fetch similar jobs
   const similarJobs = await getSimilarJobs(job.id, job.category_id || undefined);
   
-  // Format date
-  const postedDate = job.posted_at ? format(new Date(job.posted_at), 'MMM dd, yyyy') : 'Recently';
-  const expiryDate = job.expires_at ? format(new Date(job.expires_at), 'MMM dd, yyyy') : null;
+  // Format dates
+  const postedDate = formatDistanceToNow(new Date(job.posted_at), { addSuffix: true });
   
   return (
     <PublicLayout>
@@ -129,12 +133,60 @@ export default async function JobDetailsPage({ params }: { params: { slug: strin
                   </div>
                 </div>
                 
-                <Button variant="outline" size="icon" className="rounded-full" title="Share job">
-                  <Share2 className="h-4 w-4" />
-                </Button>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" size="icon" className="rounded-full" title="Share job">
+                      <Share2 className="h-4 w-4" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-64 p-4">
+                    <h3 className="font-medium mb-3">Share this job</h3>
+                    <div className="grid grid-cols-4 gap-2">
+                      <a 
+                        href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(`${process.env.NEXT_PUBLIC_SITE_URL || 'https://remotechakri.com'}/jobs/${job.slug}`)}`} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="flex flex-col items-center justify-center p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800"
+                      >
+                        <Facebook className="h-5 w-5 text-blue-600" />
+                        <span className="text-xs mt-1">Facebook</span>
+                      </a>
+                      
+                      <a 
+                        href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`Check out this job: ${job.title} at ${job.company_name}`)}&url=${encodeURIComponent(`${process.env.NEXT_PUBLIC_SITE_URL || 'https://remotechakri.com'}/jobs/${job.slug}`)}`} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="flex flex-col items-center justify-center p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800"
+                      >
+                        <Twitter className="h-5 w-5 text-sky-500" />
+                        <span className="text-xs mt-1">Twitter</span>
+                      </a>
+                      
+                      <a 
+                        href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(`${process.env.NEXT_PUBLIC_SITE_URL || 'https://remotechakri.com'}/jobs/${job.slug}`)}`} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="flex flex-col items-center justify-center p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800"
+                      >
+                        <Linkedin className="h-5 w-5 text-blue-700" />
+                        <span className="text-xs mt-1">LinkedIn</span>
+                      </a>
+                      
+                      <a 
+                        href={`https://wa.me/?text=${encodeURIComponent(`Check out this job: ${job.title} at ${job.company_name}\n\n${process.env.NEXT_PUBLIC_SITE_URL || 'https://remotechakri.com'}/jobs/${job.slug}`)}`} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="flex flex-col items-center justify-center p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800"
+                      >
+                        <MessageCircle className="h-5 w-5 text-green-500" />
+                        <span className="text-xs mt-1">WhatsApp</span>
+                      </a>
+                    </div>
+                  </PopoverContent>
+                </Popover>
               </div>
               
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                 <div className="flex items-center">
                   <MapPin className="h-4 w-4 text-gray-500 mr-2" />
                   <Link href={`/locations/${job.location?.slug || '#'}`} className="text-sm text-gray-600 dark:text-gray-300 hover:text-primary">
@@ -153,13 +205,6 @@ export default async function JobDetailsPage({ params }: { params: { slug: strin
                   <Calendar className="h-4 w-4 text-gray-500 mr-2" />
                   <span className="text-sm text-gray-600 dark:text-gray-300">
                     Posted {postedDate}
-                  </span>
-                </div>
-                
-                <div className="flex items-center">
-                  <Clock className="h-4 w-4 text-gray-500 mr-2" />
-                  <span className="text-sm text-gray-600 dark:text-gray-300">
-                    {expiryDate ? `Expires ${expiryDate}` : 'Open until filled'}
                   </span>
                 </div>
               </div>
@@ -202,18 +247,26 @@ export default async function JobDetailsPage({ params }: { params: { slug: strin
               <div className="flex flex-col gap-4">
                 <div className="flex flex-col sm:flex-row gap-4">
                   <Button className="flex-1" asChild>
-                    <a href={job.apply_url || '#'} target="_blank" rel="noopener noreferrer">
+                    <a href={job.external_url} target="_blank" rel="noopener noreferrer">
                       Apply Now
                       <ExternalLink className="ml-2 h-4 w-4" />
                     </a>
                   </Button>
                   
-                  <JobBookmarkButton 
-                    jobId={job.id} 
-                    variant="outline" 
-                    className="flex-1"
-                    showText={true}
-                  />
+                  <div className="flex gap-2 flex-1">
+                    <JobBookmarkButton 
+                      jobId={job.id} 
+                      variant="outline" 
+                      className="flex-1"
+                      showText={true}
+                    />
+                    
+                    <JobShare 
+                      jobTitle={job.title}
+                      jobUrl={`${process.env.NEXT_PUBLIC_SITE_URL || 'https://remotechakri.com'}/jobs/${job.slug}`}
+                      companyName={job.company_name}
+                    />
+                  </div>
                 </div>
                 
                 {/* Job status tracker for logged-in users */}
@@ -297,15 +350,7 @@ export default async function JobDetailsPage({ params }: { params: { slug: strin
                     </div>
                   </div>
                   
-                  {expiryDate && (
-                    <div className="flex items-start">
-                      <Clock className="h-5 w-5 text-gray-500 mr-3 mt-0.5" />
-                      <div>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">Expiry Date</p>
-                        <p className="font-medium dark:text-white">{expiryDate}</p>
-                      </div>
-                    </div>
-                  )}
+                  {/* Job expiration date hidden as requested */}
                   
                   {job.salary_min && job.salary_max && (
                     <div className="flex items-start">
@@ -342,7 +387,7 @@ export default async function JobDetailsPage({ params }: { params: { slug: strin
                 
                 <div className="mt-6">
                   <Button className="w-full" asChild>
-                    <a href={job.apply_url || '#'} target="_blank" rel="noopener noreferrer">
+                    <a href={job.external_url} target="_blank" rel="noopener noreferrer">
                       Apply Now
                       <ExternalLink className="ml-2 h-4 w-4" />
                     </a>

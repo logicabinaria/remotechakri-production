@@ -1,5 +1,9 @@
 export const runtime = 'edge';
 
+// Use a balanced approach with a short revalidation time
+// This provides fresh data without excessive database load
+export const revalidate = 60; // Revalidate every minute
+
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Briefcase } from 'lucide-react';

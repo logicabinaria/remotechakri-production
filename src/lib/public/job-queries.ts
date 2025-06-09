@@ -8,7 +8,7 @@ import type { JobWithRelations } from '@/lib/supabase';
  * Fetch featured jobs with pagination and related data
  */
 export async function getFeaturedJobs(limit = 6): Promise<JobWithRelations[]> {
-  // Use a unique query parameter to bypass caching
+  // Ensure we always get fresh data by checking expiration
   const { data, error } = await supabase
     .from('jobs')
     .select(`
@@ -20,6 +20,7 @@ export async function getFeaturedJobs(limit = 6): Promise<JobWithRelations[]> {
     .eq('is_published', true)
     .eq('is_featured', true)
     .is('deleted_at', null)
+    .or(`expires_at.is.null,expires_at.gt.${new Date().toISOString()}`)
     .order('posted_at', { ascending: false })
     .limit(limit);
 
@@ -63,18 +64,86 @@ export async function getLatestJobs(options: GetLatestJobsOptions = {}): Promise
   // Calculate offset based on page and limit
   const offset = (page - 1) * limit;
 
-  // Get total count of active jobs
-  const { count, error: countError } = await supabase
+  // We'll calculate the total count after applying filters
+  let totalCount = 0;
+  let categoryId, locationId, jobTypeId, tagId, jobIdsWithTag;
+  
+  // Get IDs for filters if provided
+  if (categorySlug) {
+    const { data: categoryData } = await supabase
+      .from('categories')
+      .select('id')
+      .eq('slug', categorySlug)
+      .single();
+    categoryId = categoryData?.id;
+  }
+  
+  if (locationSlug) {
+    const { data: locationData } = await supabase
+      .from('locations')
+      .select('id')
+      .eq('slug', locationSlug)
+      .single();
+    locationId = locationData?.id;
+  }
+  
+  if (jobTypeSlug) {
+    const { data: jobTypeData } = await supabase
+      .from('job_types')
+      .select('id')
+      .eq('slug', jobTypeSlug)
+      .single();
+    jobTypeId = jobTypeData?.id;
+  }
+  
+  if (tagSlug) {
+    const { data: tagData } = await supabase
+      .from('tags')
+      .select('id')
+      .eq('slug', tagSlug)
+      .single();
+    tagId = tagData?.id;
+    
+    if (tagId) {
+      const { data: jobsWithTag } = await supabase
+        .from('job_tags')
+        .select('job_id')
+        .eq('tag_id', tagId);
+      
+      if (jobsWithTag && jobsWithTag.length > 0) {
+        jobIdsWithTag = jobsWithTag.map(item => item.job_id);
+      } else {
+        return { jobs: [], total: 0 };
+      }
+    }
+  }
+  
+  // Build count query with all filters
+  let countQuery = supabase
     .from('jobs')
     .select('*', { count: 'exact', head: true })
     .eq('is_published', true)
     .is('deleted_at', null)
     .or(`expires_at.is.null,expires_at.gt.${new Date().toISOString()}`);
+  
+  // Apply the same filters to count query
+  if (categoryId) countQuery = countQuery.eq('category_id', categoryId);
+  if (locationId) countQuery = countQuery.eq('location_id', locationId);
+  if (jobTypeId) countQuery = countQuery.eq('job_type_id', jobTypeId);
+  if (jobIdsWithTag) countQuery = countQuery.in('id', jobIdsWithTag);
+  if (searchQuery) {
+    const searchTerm = `%${searchQuery}%`;
+    countQuery = countQuery.or(`title.ilike.${searchTerm},description.ilike.${searchTerm}`);
+  }
+  
+  const { count, error: countError } = await countQuery;
 
   if (countError) {
     console.error('Error counting jobs:', countError);
     return { jobs: [], total: 0 };
   }
+  
+  totalCount = count || 0;
 
   // Start building the query
   let query = supabase
@@ -92,15 +161,42 @@ export async function getLatestJobs(options: GetLatestJobsOptions = {}): Promise
     
   // Apply filters if provided
   if (categorySlug) {
-    query = query.eq('category.slug', categorySlug);
+    // First get the category ID from the slug
+    const { data: categoryData } = await supabase
+      .from('categories')
+      .select('id')
+      .eq('slug', categorySlug)
+      .single();
+      
+    if (categoryData?.id) {
+      query = query.eq('category_id', categoryData.id);
+    }
   }
   
   if (locationSlug) {
-    query = query.eq('location.slug', locationSlug);
+    // First get the location ID from the slug
+    const { data: locationData } = await supabase
+      .from('locations')
+      .select('id')
+      .eq('slug', locationSlug)
+      .single();
+      
+    if (locationData?.id) {
+      query = query.eq('location_id', locationData.id);
+    }
   }
   
   if (jobTypeSlug) {
-    query = query.eq('job_type.slug', jobTypeSlug);
+    // First get the job type ID from the slug
+    const { data: jobTypeData } = await supabase
+      .from('job_types')
+      .select('id')
+      .eq('slug', jobTypeSlug)
+      .single();
+      
+    if (jobTypeData?.id) {
+      query = query.eq('job_type_id', jobTypeData.id);
+    }
   }
   
   if (searchQuery) {
@@ -109,8 +205,28 @@ export async function getLatestJobs(options: GetLatestJobsOptions = {}): Promise
   }
   
   if (tagSlug) {
-    // This requires a more complex query with joins
-    query = query.eq('tags.tags.slug', tagSlug);
+    // First get the tag ID from the slug
+    const { data: tagData } = await supabase
+      .from('tags')
+      .select('id')
+      .eq('slug', tagSlug)
+      .single();
+      
+    if (tagData?.id) {
+      // Use a subquery to find jobs with this tag
+      const { data: jobsWithTag } = await supabase
+        .from('job_tags')
+        .select('job_id')
+        .eq('tag_id', tagData.id);
+        
+      if (jobsWithTag && jobsWithTag.length > 0) {
+        const jobIds = jobsWithTag.map(item => item.job_id);
+        query = query.in('id', jobIds);
+      } else {
+        // If no jobs found with this tag, return empty result
+        return { jobs: [], total: 0 };
+      }
+    }
   }
   
   // Complete the query with ordering and pagination
@@ -125,7 +241,7 @@ export async function getLatestJobs(options: GetLatestJobsOptions = {}): Promise
 
   return { 
     jobs: data || [], 
-    total: count || 0 
+    total: totalCount 
   };
 }
 
