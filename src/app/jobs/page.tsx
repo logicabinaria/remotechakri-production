@@ -1,8 +1,8 @@
 export const runtime = 'edge';
 
-// Force dynamic rendering to ensure fresh data on every request
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
+// Use a balanced approach with a short revalidation time
+// This provides fresh data without excessive database load
+export const revalidate = 60; // Revalidate every minute
 
 import { Suspense } from 'react';
 import Link from 'next/link';

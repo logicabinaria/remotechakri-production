@@ -1,6 +1,9 @@
-// Force dynamic rendering to ensure fresh data on every request
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
+// Configure Edge Runtime for Cloudflare Pages compatibility
+export const runtime = 'edge';
+
+// Use a balanced approach with a short revalidation time
+// This provides fresh data without excessive database load
+export const revalidate = 60; // Revalidate every minute
 
 import { PublicLayout } from "@/components/public/layout/public-layout";
 import { getFeaturedJobs } from "@/lib/public/job-queries";
