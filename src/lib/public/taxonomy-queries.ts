@@ -8,6 +8,31 @@ import type { Category, Location, JobType, Tag } from '@/lib/supabase';
  * Fetch all active categories with job counts
  */
 export async function getAllCategories(): Promise<(Category & { job_count: number })[]> {
+  try {
+    // Get all categories with job counts in a single query using PostgreSQL's count function
+    const { data, error } = await supabase.rpc('get_categories_with_job_counts');
+    
+    if (error) {
+      console.error('Error fetching categories with job counts:', error);
+      
+      // Fallback to the old method if the RPC function is not available
+      return getAllCategoriesLegacy();
+    }
+    
+    return data || [];
+  } catch (error) {
+    console.error('Error in getAllCategories:', error);
+    
+    // Fallback to the old method if there's any error
+    return getAllCategoriesLegacy();
+  }
+}
+
+/**
+ * Legacy method to fetch all active categories with job counts
+ * This is used as a fallback if the RPC method fails
+ */
+async function getAllCategoriesLegacy(): Promise<(Category & { job_count: number })[]> {
   // First get all categories
   const { data: categories, error } = await supabase
     .from('categories')
@@ -84,6 +109,31 @@ export async function getCategoryBySlug(slug: string): Promise<(Category & { job
  * Fetch all active locations with job counts
  */
 export async function getAllLocations(): Promise<(Location & { job_count: number })[]> {
+  try {
+    // Get all locations with job counts in a single query using PostgreSQL's count function
+    const { data, error } = await supabase.rpc('get_locations_with_job_counts');
+    
+    if (error) {
+      console.error('Error fetching locations with job counts:', error);
+      
+      // Fallback to the old method if the RPC function is not available
+      return getAllLocationsLegacy();
+    }
+    
+    return data || [];
+  } catch (error) {
+    console.error('Error in getAllLocations:', error);
+    
+    // Fallback to the old method if there's any error
+    return getAllLocationsLegacy();
+  }
+}
+
+/**
+ * Legacy method to fetch all active locations with job counts
+ * This is used as a fallback if the RPC method fails
+ */
+async function getAllLocationsLegacy(): Promise<(Location & { job_count: number })[]> {
   // First get all locations
   const { data: locations, error } = await supabase
     .from('locations')
@@ -160,6 +210,31 @@ export async function getLocationBySlug(slug: string): Promise<(Location & { job
  * Fetch all active job types with job counts
  */
 export async function getAllJobTypes(): Promise<(JobType & { job_count: number })[]> {
+  try {
+    // Get all job types with job counts in a single query using PostgreSQL's count function
+    const { data, error } = await supabase.rpc('get_job_types_with_job_counts');
+    
+    if (error) {
+      console.error('Error fetching job types with job counts:', error);
+      
+      // Fallback to the old method if the RPC function is not available
+      return getAllJobTypesLegacy();
+    }
+    
+    return data || [];
+  } catch (error) {
+    console.error('Error in getAllJobTypes:', error);
+    
+    // Fallback to the old method if there's any error
+    return getAllJobTypesLegacy();
+  }
+}
+
+/**
+ * Legacy method to fetch all active job types with job counts
+ * This is used as a fallback if the RPC method fails
+ */
+async function getAllJobTypesLegacy(): Promise<(JobType & { job_count: number })[]> {
   // First get all job types
   const { data: jobTypes, error } = await supabase
     .from('job_types')
@@ -237,6 +312,31 @@ export async function getJobTypeBySlug(slug: string): Promise<(JobType & { job_c
  */
 export async function getPopularTags(limit = 10): Promise<(Tag & { job_count: number })[]> {
   try {
+    // Try to use the optimized RPC function first
+    const { data, error } = await supabase.rpc('get_popular_tags_with_counts', { tag_limit: limit });
+    
+    if (error) {
+      console.error('Error fetching popular tags with counts:', error);
+      
+      // Fallback to the legacy method if the RPC function is not available
+      return getPopularTagsLegacy(limit);
+    }
+    
+    return data || [];
+  } catch (error) {
+    console.error('Error in getPopularTags:', error);
+    
+    // Fallback to the legacy method if there's any error
+    return getPopularTagsLegacy(limit);
+  }
+}
+
+/**
+ * Legacy method to fetch popular tags with job counts
+ * This is used as a fallback if the RPC method fails
+ */
+async function getPopularTagsLegacy(limit = 10): Promise<(Tag & { job_count: number })[]> {
+  try {
     // Get active jobs first
     const { data: activeJobs, error: jobsError } = await supabase
       .from('jobs')
@@ -299,7 +399,7 @@ export async function getPopularTags(limit = 10): Promise<(Tag & { job_count: nu
     
     return popularTags;
   } catch (error) {
-    console.error('Error in getPopularTags:', error);
+    console.error('Error in getPopularTagsLegacy:', error);
     return [];
   }
 }
