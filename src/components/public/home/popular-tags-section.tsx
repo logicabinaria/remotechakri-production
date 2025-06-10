@@ -1,3 +1,4 @@
+import * as React from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -26,9 +27,11 @@ export function PopularTagsSection({ tags }: PopularTagsSectionProps) {
               key={tag.id} 
               href={`/tags/${tag.slug}`}
             >
-              <Badge variant="secondary" className="px-4 py-2 text-sm hover:bg-primary hover:text-white transition-colors">
-                {tag.name} ({tag.job_count})
-              </Badge>
+              <React.Fragment key={`tag-badge-${tag.id}`}>
+                <Badge variant="secondary" className="px-4 py-2 text-sm hover:bg-primary hover:text-white transition-colors">
+                  {tag.name} ({tag.job_count})
+                </Badge>
+              </React.Fragment>
             </Link>
           ))}
         </div>

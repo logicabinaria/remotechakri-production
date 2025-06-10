@@ -1,5 +1,6 @@
 "use client";
 
+import * as React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { formatDistanceToNow } from "date-fns";
@@ -51,7 +52,7 @@ export function JobCompactCard({ job, featured = false }: JobCompactCardProps) {
                 {job.title}
               </h3>
               {featured && (
-                <Badge variant="default" className="ml-2 flex-shrink-0 bg-gray-900 hover:bg-gray-800">
+                <Badge key="featured-badge" variant="default" className="ml-2 flex-shrink-0 bg-gray-900 hover:bg-gray-800">
                   Featured
                 </Badge>
               )}
@@ -81,25 +82,34 @@ export function JobCompactCard({ job, featured = false }: JobCompactCardProps) {
         </div>
         
         <div className="flex flex-wrap gap-2 mt-4">
+          {/* Use fragments with keys for each badge item */}
           {job.category && (
-            <Badge variant="outline" className="text-xs py-1 px-3 rounded-full border-gray-200 text-gray-700 bg-gray-50 hover:bg-gray-100 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700">
-              {job.category.name}
-            </Badge>
+            <React.Fragment key={`category-fragment-${job.category.id}`}>
+              <Badge variant="outline" className="text-xs py-1 px-3 rounded-full border-gray-200 text-gray-700 bg-gray-50 hover:bg-gray-100 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700">
+                {job.category.name}
+              </Badge>
+            </React.Fragment>
           )}
           {job.job_type && (
-            <Badge variant="outline" className="text-xs py-1 px-3 rounded-full border-gray-200 text-gray-700 bg-gray-50 hover:bg-gray-100 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700">
-              {job.job_type.name}
-            </Badge>
+            <React.Fragment key={`job-type-fragment-${job.job_type.id}`}>
+              <Badge variant="outline" className="text-xs py-1 px-3 rounded-full border-gray-200 text-gray-700 bg-gray-50 hover:bg-gray-100 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700">
+                {job.job_type.name}
+              </Badge>
+            </React.Fragment>
           )}
           {job.tags && job.tags.length > 0 && job.tags.slice(0, 3).map((tag) => (
-            <Badge key={tag.id} variant="outline" className="text-xs py-1 px-3 rounded-full border-gray-200 text-gray-700 bg-gray-50 hover:bg-gray-100 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700">
-              {tag.name}
-            </Badge>
+            <React.Fragment key={`tag-fragment-${tag.id}`}>
+              <Badge variant="outline" className="text-xs py-1 px-3 rounded-full border-gray-200 text-gray-700 bg-gray-50 hover:bg-gray-100 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700">
+                {tag.name}
+              </Badge>
+            </React.Fragment>
           ))}
           {job.tags && job.tags.length > 3 && (
-            <Badge variant="outline" className="text-xs py-1 px-3 rounded-full border-gray-200 text-gray-700 bg-gray-50 hover:bg-gray-100 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700">
-              +{job.tags.length - 3} more
-            </Badge>
+            <React.Fragment key="more-tags-fragment">
+              <Badge variant="outline" className="text-xs py-1 px-3 rounded-full border-gray-200 text-gray-700 bg-gray-50 hover:bg-gray-100 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700">
+                +{job.tags.length - 3} more
+              </Badge>
+            </React.Fragment>
           )}
         </div>
       </div>

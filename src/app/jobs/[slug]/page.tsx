@@ -1,8 +1,9 @@
 export const runtime = 'edge';
 
-// Use a balanced approach with a short revalidation time
-// This provides fresh data without excessive database load
-export const revalidate = 60; // Revalidate every minute
+// Force dynamic rendering to ensure fresh data on each page visit
+export const dynamic = 'force-dynamic';
+
+// Remove revalidation setting since we're using dynamic rendering
 
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
@@ -374,7 +375,7 @@ export default async function JobDetailsPage({ params }: { params: { slug: strin
                         <div className="flex flex-wrap gap-2 mt-2">
                           {job.tags.map((tag, index) => (
                             <Link key={tag.id || index} href={`/tags/${tag.slug}`}>
-                              <Badge variant="secondary" className="px-2 py-0.5 text-xs hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+                              <Badge key={`tag-badge-${tag.id || index}`} variant="secondary" className="px-2 py-0.5 text-xs hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
                                 {tag.name}
                               </Badge>
                             </Link>

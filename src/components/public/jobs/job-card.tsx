@@ -1,5 +1,6 @@
 "use client";
 
+import * as React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { formatDistanceToNow } from "date-fns";
@@ -55,9 +56,11 @@ export function JobCard({ job, featured = false }: JobCardProps) {
             </div>
           </div>
           {featured && (
-            <Badge variant="default" className="ml-auto">
-              Featured
-            </Badge>
+            <React.Fragment key="featured-fragment">
+              <Badge variant="default" className="ml-auto">
+                Featured
+              </Badge>
+            </React.Fragment>
           )}
         </div>
 
@@ -99,14 +102,18 @@ export function JobCard({ job, featured = false }: JobCardProps) {
         {job.tags && job.tags.length > 0 && (
           <div className="flex flex-wrap gap-2 mb-4">
             {job.tags.slice(0, 3).map((tag) => (
-              <Badge key={tag.id} variant="outline" className="text-xs">
-                {tag.name}
-              </Badge>
+              <React.Fragment key={`tag-fragment-${tag.id}`}>
+                <Badge variant="outline" className="text-xs">
+                  {tag.name}
+                </Badge>
+              </React.Fragment>
             ))}
             {job.tags.length > 3 && (
-              <Badge variant="outline" className="text-xs">
-                +{job.tags.length - 3} more
-              </Badge>
+              <React.Fragment key="more-tags-fragment">
+                <Badge variant="outline" className="text-xs">
+                  +{job.tags.length - 3} more
+                </Badge>
+              </React.Fragment>
             )}
           </div>
         )}

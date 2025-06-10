@@ -13,6 +13,7 @@ import { TagSelector } from "@/components/ui/tag-selector";
 import { ImageUpload } from "@/components/ui/image-upload";
 import { Combobox } from "@/components/ui/combobox";
 import { JobType, Category, Location, Tag } from "@/lib/supabase";
+import { Loader2 } from "lucide-react";
 
 // Simple inline Alert component to avoid module resolution issues
 const Alert = ({ children, variant = "default", className = "", ...props }: {
@@ -75,6 +76,16 @@ export default function CreateJobPage() {
     is_featured: false,
     expires_at: "", // Default empty, will be set to 30 days from now
   });
+  const [checkingDuplicates, setCheckingDuplicates] = useState(false);
+  const [duplicateResults, setDuplicateResults] = useState<{
+    has_duplicates: boolean;
+    duplicates: Array<{
+      field: string;
+      id: string;
+      value: string;
+      posted_at: string;
+    }>;
+  } | null>(null);
 
   useEffect(() => {
     // Set default expiry date to 30 days from now
@@ -294,6 +305,85 @@ export default function CreateJobPage() {
               </div>
 
               <div>
+                <Label htmlFor="external_url">Application URL</Label>
+                <Input
+                  id="external_url"
+                  name="external_url"
+                  value={formData.external_url}
+                  onChange={handleChange}
+                  placeholder="https://"
+                  required
+                />
+                <p className="text-xs text-gray-500 mt-1">URL where candidates can apply for this job</p>
+              </div>
+
+              <div>
+                <Button 
+                  type="button" 
+                  variant="secondary"
+                  className="w-full"
+                  onClick={async () => {
+                    if (!formData.title && !formData.slug && !formData.external_url) {
+                      alert("Please enter at least one of: title, slug, or application URL to check for duplicates");
+                      return;
+                    }
+                    
+                    setCheckingDuplicates(true);
+                    setDuplicateResults(null);
+                    
+                    try {
+                      const { data, error } = await supabase.rpc('check_duplicate_job', {
+                        job_title: formData.title,
+                        job_slug: formData.slug,
+                        job_external_url: formData.external_url
+                      });
+                      
+                      if (error) throw error;
+                      setDuplicateResults(data);
+                      
+                      if (data.has_duplicates) {
+                        // Duplicate found, but we'll show the alert below
+                      } else {
+                        alert("No duplicates found. You can proceed with creating this job.");
+                      }
+                    } catch (error) {
+                      console.error('Error checking for duplicates:', error);
+                      alert("Error checking for duplicates. Please try again.");
+                    } finally {
+                      setCheckingDuplicates(false);
+                    }
+                  }}
+                  disabled={checkingDuplicates}
+                >
+                  {checkingDuplicates ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Checking...
+                    </>
+                  ) : (
+                    "Check for Duplicate Jobs"
+                  )}
+                </Button>
+                
+                {duplicateResults?.has_duplicates && (
+                  <Alert variant="destructive" className="mt-2">
+                    <AlertDescription>
+                      <div className="font-bold mb-2">Duplicate job(s) found:</div>
+                      <ul className="list-disc pl-5 space-y-1">
+                        {duplicateResults.duplicates.map((dup, idx) => (
+                          <li key={idx}>
+                            Duplicate {dup.field}: &ldquo;{dup.value}&rdquo;
+                            <div className="text-xs">Posted: {new Date(dup.posted_at).toLocaleDateString()}</div>
+                          </li>
+                        ))}
+                      </ul>
+                      <div className="mt-2">Please modify your job details to avoid duplicates.</div>
+                    </AlertDescription>
+                  </Alert>
+                )}
+              </div>
+
+              <div>
                 <Label htmlFor="description">Job Description</Label>
                 <div className="mt-1">
                   <RichTextEditor
@@ -501,17 +591,7 @@ export default function CreateJobPage() {
                 </div>
               </div>
 
-              <div>
-                <Label htmlFor="external_url">Application URL</Label>
-                <Input
-                  id="external_url"
-                  name="external_url"
-                  value={formData.external_url}
-                  onChange={handleChange}
-                  placeholder="https://"
-                  required
-                />
-              </div>
+              {/* External URL field moved up, next to slug field */}
 
               <div className="space-y-2">
                 <Label>Tags</Label>
