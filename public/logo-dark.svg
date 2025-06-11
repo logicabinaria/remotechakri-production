@@ -1,0 +1,5 @@
+<svg width="200" height="50" viewBox="0 0 200 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="200" height="50" fill="#0F172A"/>
+  <path d="M20 15H35C37.7614 15 40 17.2386 40 20V30C40 32.7614 37.7614 35 35 35H20C17.2386 35 15 32.7614 15 30V20C15 17.2386 17.2386 15 20 15Z" fill="#F8FAFC"/>
+  <text x="50" y="30" font-family="Arial" font-size="16" font-weight="bold" fill="#F8FAFC">RemoteChakri.com</text>
+</svg>

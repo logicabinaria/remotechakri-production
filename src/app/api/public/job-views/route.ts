@@ -47,11 +47,33 @@ export async function POST(request: NextRequest) {
     }
     
     // Get IP address (partially anonymized for privacy)
-    const forwardedFor = request.headers.get("x-forwarded-for");
-    let ip = forwardedFor ? forwardedFor.split(",")[0] : "unknown";
+    // Try multiple headers to handle different deployment environments
+    let ip = "unknown";
     
-    // Anonymize IP by removing last octet
-    ip = ip.split(".").slice(0, 3).join(".") + ".0";
+    // Check Cloudflare-specific header first
+    const cfConnectingIp = request.headers.get("cf-connecting-ip");
+    if (cfConnectingIp) {
+      ip = cfConnectingIp;
+    } else {
+      // Fall back to standard headers
+      const forwardedFor = request.headers.get("x-forwarded-for");
+      if (forwardedFor) {
+        ip = forwardedFor.split(",")[0];
+      } else {
+        // Last resort - try to get from request
+        const requestIp = request.ip || "unknown";
+        ip = requestIp;
+      }
+    }
+    
+    // Anonymize IP - handle both IPv4 and IPv6
+    if (ip.includes(".")) {
+      // IPv4 format
+      ip = ip.split(".").slice(0, 3).join(".") + ".0";
+    } else if (ip.includes(":")) {
+      // IPv6 format - take first 4 segments
+      ip = ip.split(":").slice(0, 4).join(":") + ":0:0:0:0";
+    }
     
     // Get viewer ID from cookies if user is authenticated
     // We'll use this only for analytics, not for DB foreign key

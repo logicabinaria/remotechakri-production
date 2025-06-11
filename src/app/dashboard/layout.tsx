@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { useSupabase } from "@/components/providers/supabase-provider";
 import { 
   LayoutDashboard, 
@@ -10,10 +11,45 @@ import {
   Eye, 
   Settings, 
   LogOut, 
-  Phone
+  Phone,
+  Menu,
+  X
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { PublicHeader } from "@/components/public/layout/public-header";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+
+// Inline media query hook
+function useMediaQuery(query: string): boolean {
+  const [matches, setMatches] = useState(false);
+
+  useEffect(() => {
+    // Check if we're in a browser environment
+    if (typeof window !== 'undefined') {
+      const media = window.matchMedia(query);
+      // Set the initial value
+      setMatches(media.matches);
+
+      // Define a callback function to handle changes
+      const listener = () => {
+        setMatches(media.matches);
+      };
+
+      // Add the listener
+      media.addEventListener('change', listener);
+
+      // Clean up
+      return () => {
+        media.removeEventListener('change', listener);
+      };
+    }
+    
+    return () => {};
+  }, [query]);
+
+  return matches;
+}
 
 interface UserProfile {
   user_id: string;
@@ -33,6 +69,8 @@ export default function DashboardLayout({
   const supabase = useSupabase();
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const isMobile = useMediaQuery("(max-width: 768px)");
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -125,12 +163,49 @@ export default function DashboardLayout({
       <PublicHeader />
 
       {/* Main content */}
-      <div className="container mx-auto px-4 py-8">
+      {/* Mobile menu button */}
+      <div className="container mx-auto px-4 py-2 md:hidden">
+        <Button
+          variant="outline"
+          size="sm"
+          className="flex items-center gap-2"
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+        >
+          {sidebarOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+          {sidebarOpen ? "Close Menu" : "Menu"}
+        </Button>
+      </div>
+
+      <div className="container mx-auto px-4 py-4">
         <div className="flex flex-col md:flex-row gap-8">
-          {/* Sidebar - Desktop only */}
-          <aside className="hidden md:block w-64 shrink-0">
+          {/* Sidebar - Responsive */}
+          <aside className={cn(
+            "w-full md:w-64 md:shrink-0",
+            sidebarOpen ? "block" : "hidden md:block"
+          )}>
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-              <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+              <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+                {/* Logo for mobile sidebar */}
+                <div className="flex justify-center mb-4">
+                  <div className="relative h-8 w-40">
+                    <Image 
+                      src={process.env.NEXT_PUBLIC_LOGO_DARK_URL || '/logo-dark.svg'}
+                      alt="RemoteChakri.com"
+                      fill
+                      sizes="160px"
+                      className="hidden dark:block object-contain"
+                      priority
+                    />
+                    <Image 
+                      src={process.env.NEXT_PUBLIC_LOGO_LIGHT_URL || '/logo-light.svg'}
+                      alt="RemoteChakri.com"
+                      fill
+                      sizes="160px"
+                      className="block dark:hidden object-contain"
+                      priority
+                    />
+                  </div>
+                </div>
                 <div className="flex flex-col items-center text-center">
                   <Avatar className="h-16 w-16 mb-3">
                     <AvatarImage src={userProfile?.avatar_url || ''} alt={userProfile?.full_name || 'User'} />
@@ -151,6 +226,7 @@ export default function DashboardLayout({
                       <Link
                         href={item.href}
                         className="flex items-center space-x-3 px-3 py-2 rounded-md text-gray-600 hover:text-primary hover:bg-gray-100 dark:text-gray-300 dark:hover:text-primary dark:hover:bg-gray-800 transition-colors"
+                        onClick={() => isMobile && setSidebarOpen(false)}
                       >
                         {item.icon}
                         <span>{item.name}</span>
