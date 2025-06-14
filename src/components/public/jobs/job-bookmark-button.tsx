@@ -81,7 +81,10 @@ export function JobBookmarkButton({
   }, [supabase, jobId]);
 
   // Toggle bookmark status
-  const toggleBookmark = async () => {
+  const toggleBookmark = async (e: React.MouseEvent) => {
+    // Prevent the event from propagating to parent elements (like links)
+    e.preventDefault();
+    e.stopPropagation();
     if (!userId) {
       toast({
         title: 'Authentication required',
@@ -199,7 +202,7 @@ export function JobBookmarkButton({
       variant={variant}
       size={size}
       className={className}
-      onClick={toggleBookmark}
+      onClick={(e) => toggleBookmark(e)}
       disabled={isLoading}
     >
       {isLoading ? (

@@ -13,11 +13,20 @@ import {
 
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = React.useState(false);
+  
+  // After mounting, we have access to the theme
+  React.useEffect(() => setMounted(true), []);
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" aria-label={`Current theme: ${theme}`}>
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          // Only add aria-label after mounting to avoid hydration mismatch
+          {...(mounted ? { 'aria-label': `Current theme: ${theme}` } : {})}
+        >
           <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
           <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
           <span className="sr-only">Toggle theme</span>

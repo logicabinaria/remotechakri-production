@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import type { JobWithRelations } from "@/lib/supabase";
+import { JobBookmarkButton } from "./job-bookmark-button";
 
 interface JobCardProps {
   job: JobWithRelations;
@@ -64,12 +65,22 @@ export function JobCard({ job, featured = false }: JobCardProps) {
           )}
         </div>
 
-        {/* Job title and details */}
-        <Link href={`/jobs/${job.slug}`} className="hover:no-underline">
-          <h2 className="text-xl font-semibold mb-2 hover:text-primary transition-colors">
-            {job.title}
-          </h2>
-        </Link>
+        {/* Job title and bookmark button */}
+        <div className="flex justify-between items-start mb-2">
+          <Link href={`/jobs/${job.slug}`} className="hover:no-underline flex-1">
+            <h2 className="text-xl font-semibold hover:text-primary transition-colors pr-2">
+              {job.title}
+            </h2>
+          </Link>
+          <div className="flex-shrink-0">
+            <JobBookmarkButton 
+              jobId={job.id} 
+              variant="ghost" 
+              size="sm" 
+              showText={false} 
+            />
+          </div>
+        </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-4">
           {job.location && (
@@ -101,12 +112,14 @@ export function JobCard({ job, featured = false }: JobCardProps) {
         {/* Tags */}
         {job.tags && job.tags.length > 0 && (
           <div className="flex flex-wrap gap-2 mb-4">
-            {job.tags.slice(0, 3).map((tag) => (
-              <React.Fragment key={`tag-fragment-${tag.id}`}>
-                <Badge variant="outline" className="text-xs">
-                  {tag.name}
-                </Badge>
-              </React.Fragment>
+            {job.tags.slice(0, 3).map((tag, index) => (
+              <Badge 
+                key={`tag-${tag.id || index}`}
+                variant="outline" 
+                className="text-xs"
+              >
+                {tag.name}
+              </Badge>
             ))}
             {job.tags.length > 3 && (
               <React.Fragment key="more-tags-fragment">

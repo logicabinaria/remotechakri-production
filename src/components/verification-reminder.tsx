@@ -11,24 +11,30 @@ export function VerificationReminder() {
   const router = useRouter();
 
   useEffect(() => {
-    // Check if verification is pending
-    const isPending = localStorage.getItem('whatsapp_verification_pending');
+    // Check if WhatsApp verification is enabled via environment variable
+    const enableWhatsAppVerification = process.env.NEXT_PUBLIC_ENABLE_WHATSAPP_VERIFICATION === 'true';
     
-    // Check if there's a reminder time set
-    const reminderTime = localStorage.getItem('whatsapp_verification_reminder_time');
-    
-    if (isPending === 'true') {
-      // If there's a reminder time, check if it's passed
-      if (reminderTime) {
-        const nextReminder = new Date(reminderTime);
-        const now = new Date();
-        
-        if (now >= nextReminder) {
+    // Only show reminder if WhatsApp verification is enabled
+    if (enableWhatsAppVerification) {
+      // Check if verification is pending
+      const isPending = localStorage.getItem('whatsapp_verification_pending');
+      
+      // Check if there's a reminder time set
+      const reminderTime = localStorage.getItem('whatsapp_verification_reminder_time');
+      
+      if (isPending === 'true') {
+        // If there's a reminder time, check if it's passed
+        if (reminderTime) {
+          const nextReminder = new Date(reminderTime);
+          const now = new Date();
+          
+          if (now >= nextReminder) {
+            setShowReminder(true);
+          }
+        } else {
+          // No reminder time set, show the reminder
           setShowReminder(true);
         }
-      } else {
-        // No reminder time set, show the reminder
-        setShowReminder(true);
       }
     }
   }, []);

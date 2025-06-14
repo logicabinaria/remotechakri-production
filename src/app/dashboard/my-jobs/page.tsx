@@ -9,7 +9,8 @@ import Link from "next/link";
 import { toast } from "@/components/ui/use-toast";
 
 interface BookmarkedJob {
-  id: string;
+  job_id: string;
+  user_id: string;
   saved_at: string;
   job: {
     id: string;
@@ -41,7 +42,8 @@ export default function MyJobsPage() {
       const { data, error } = await supabase
         .from('my_jobs')
         .select(`
-          id,
+          job_id,
+          user_id,
           saved_at,
           job:jobs (
             id,
@@ -55,7 +57,7 @@ export default function MyJobsPage() {
           )
         `)
         .eq('user_id', userId)
-        .order('saved_at', { ascending: false });
+        .order('saved_at', { ascending: false});
       
       if (error) {
         console.error('Error fetching bookmarked jobs:', error);
@@ -74,12 +76,18 @@ export default function MyJobsPage() {
     fetchBookmarkedJobs();
   }, [fetchBookmarkedJobs]);
 
-  const removeBookmark = async (bookmarkId: string) => {
+  const removeBookmark = async (jobId: string) => {
     try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+      
+      const userId = session.user.id;
+      
       const { error } = await supabase
         .from('my_jobs')
         .delete()
-        .eq('id', bookmarkId);
+        .eq('user_id', userId)
+        .eq('job_id', jobId);
       
       if (error) {
         console.error('Error removing bookmark:', error);
@@ -92,7 +100,7 @@ export default function MyJobsPage() {
       }
       
       // Update local state
-      setBookmarkedJobs(bookmarkedJobs.filter(job => job.id !== bookmarkId));
+      setBookmarkedJobs(bookmarkedJobs.filter(job => job.job_id !== jobId));
       
       toast({
         title: "Success",
@@ -131,7 +139,7 @@ export default function MyJobsPage() {
       ) : bookmarkedJobs.length > 0 ? (
         <div className="space-y-4">
           {bookmarkedJobs.map((bookmark) => (
-            <Card key={bookmark.id} className="overflow-hidden">
+            <Card key={bookmark.job_id} className="overflow-hidden">
               <CardContent className="p-4">
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between">
                   <div className="flex-1">
@@ -173,7 +181,7 @@ export default function MyJobsPage() {
                       variant="outline" 
                       size="sm" 
                       className="flex items-center space-x-1 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
-                      onClick={() => removeBookmark(bookmark.id)}
+                      onClick={() => removeBookmark(bookmark.job_id)}
                     >
                       <Trash2 className="h-4 w-4" />
                       <span>Remove</span>

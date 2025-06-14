@@ -56,11 +56,14 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    // 1. Create user in auth.users
+    // 1. Create user in auth.users with metadata
     const { data: userData, error: authError } = await supabaseAdmin.auth.admin.createUser({
       email,
       password,
-      email_confirm: true // Auto-confirm email
+      email_confirm: true, // Auto-confirm email
+      user_metadata: {
+        full_name: fullName
+      }
     });
     
     if (authError) {

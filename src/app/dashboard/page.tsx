@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Bookmark, Eye, CheckCircle, AlertCircle } from "lucide-react";
 import Link from "next/link";
 import { VerificationReminder } from "@/components/verification-reminder";
+import { JobBookmarkButton } from "@/components/public/jobs/job-bookmark-button";
 
 interface DashboardStats {
   bookmarkedJobs: number;
@@ -223,11 +224,21 @@ export default function DashboardPage() {
                   <CardContent className="p-0">
                     <Link 
                       href={`/jobs/${job.slug}`}
-                      className="block p-4 hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors"
+                      className="block p-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                     >
                       <div className="flex flex-col md:flex-row md:items-center md:justify-between">
-                        <div>
-                          <h3 className="font-medium text-gray-900 dark:text-gray-100">{job.title}</h3>
+                        <div className="flex-1">
+                          <div className="flex justify-between items-center">
+                            <h3 className="font-medium text-gray-900 dark:text-gray-100">{job.title}</h3>
+                            <div className="flex-shrink-0 ml-2">
+                              <JobBookmarkButton 
+                                jobId={job.id} 
+                                variant="ghost" 
+                                size="sm" 
+                                showText={false} 
+                              />
+                            </div>
+                          </div>
                           <p className="text-sm text-gray-500 dark:text-gray-400">{job.company_name}</p>
                         </div>
                         <div className="flex flex-wrap gap-2 mt-2 md:mt-0">

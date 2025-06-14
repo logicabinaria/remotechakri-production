@@ -70,20 +70,25 @@ export default function LoginPage() {
             console.error('Error creating user profile:', profileError);
           }
           
-          // Check if WhatsApp is verified
-          const { data: profileData } = await supabase
-            .from('user_profiles')
-            .select('is_whatsapp_verified')
-            .eq('user_id', data.session.user.id)
-            .single();
-            
+          // Check if WhatsApp verification is enabled via environment variable
+          const enableWhatsAppVerification = process.env.NEXT_PUBLIC_ENABLE_WHATSAPP_VERIFICATION === 'true';
+          
+          if (enableWhatsAppVerification) {
+            // Check if WhatsApp is verified
+            const { data: profileData } = await supabase
+              .from('user_profiles')
+              .select('is_whatsapp_verified')
+              .eq('user_id', data.session.user.id)
+              .single();
+              
+            // Set flag if WhatsApp is not verified to show the reminder
+            if (profileData && !profileData.is_whatsapp_verified) {
+              localStorage.setItem('whatsapp_verification_pending', 'true');
+            }
+          }
+          
           // Always redirect to dashboard - verification will be handled via the reminder component
           router.push('/dashboard');
-          
-          // Set flag if WhatsApp is not verified to show the reminder
-          if (profileData && !profileData.is_whatsapp_verified) {
-            localStorage.setItem('whatsapp_verification_pending', 'true');
-          }
         } catch (error) {
           console.error('Authentication error:', error);
           router.push('/dashboard');
@@ -113,20 +118,25 @@ export default function LoginPage() {
               console.error('Error creating user profile:', profileError);
             }
             
-            // Check if WhatsApp is verified
-            const { data: profileData } = await supabase
-              .from('user_profiles')
-              .select('is_whatsapp_verified')
-              .eq('user_id', session.user.id)
-              .single();
-              
+            // Check if WhatsApp verification is enabled via environment variable
+            const enableWhatsAppVerification = process.env.NEXT_PUBLIC_ENABLE_WHATSAPP_VERIFICATION === 'true';
+            
+            if (enableWhatsAppVerification) {
+              // Check if WhatsApp is verified
+              const { data: profileData } = await supabase
+                .from('user_profiles')
+                .select('is_whatsapp_verified')
+                .eq('user_id', session.user.id)
+                .single();
+                
+              // Set flag if WhatsApp is not verified to show the reminder
+              if (profileData && !profileData.is_whatsapp_verified) {
+                localStorage.setItem('whatsapp_verification_pending', 'true');
+              }
+            }
+            
             // Always redirect to dashboard - verification will be handled via the reminder component
             router.push('/dashboard');
-            
-            // Set flag if WhatsApp is not verified to show the reminder
-            if (profileData && !profileData.is_whatsapp_verified) {
-              localStorage.setItem('whatsapp_verification_pending', 'true');
-            }
           } catch (error) {
             console.error('Authentication error:', error);
             router.push('/dashboard');

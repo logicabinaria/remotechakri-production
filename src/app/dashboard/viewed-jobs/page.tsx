@@ -23,7 +23,8 @@ import {
 } from "@/components/ui/select";
 
 interface ViewedJob {
-  id: string;
+  user_id: string;
+  job_id: string;
   status: 'viewed' | 'applied' | 'ignored';
   viewed_at: string;
   job: {
@@ -60,7 +61,8 @@ export default function ViewedJobsPage() {
       let query = supabase
         .from('viewed_jobs')
         .select(`
-          id,
+          user_id,
+          job_id,
           status,
           viewed_at,
           job:jobs (
@@ -103,10 +105,16 @@ export default function ViewedJobsPage() {
 
   const updateJobStatus = async (jobId: string, newStatus: 'viewed' | 'applied' | 'ignored') => {
     try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+      
+      const userId = session.user.id;
+      
       const { error } = await supabase
         .from('viewed_jobs')
         .update({ status: newStatus })
-        .eq('id', jobId);
+        .eq('user_id', userId)
+        .eq('job_id', jobId);
       
       if (error) {
         console.error('Error updating job status:', error);
@@ -120,7 +128,7 @@ export default function ViewedJobsPage() {
       
       // Update local state
       setViewedJobs(viewedJobs.map(job => 
-        job.id === jobId ? { ...job, status: newStatus } : job
+        job.job_id === jobId ? { ...job, status: newStatus } : job
       ));
       
       toast({
@@ -203,7 +211,7 @@ export default function ViewedJobsPage() {
       ) : viewedJobs.length > 0 ? (
         <div className="space-y-4">
           {viewedJobs.map((viewedJob) => (
-            <Card key={viewedJob.id} className="overflow-hidden">
+            <Card key={viewedJob.job_id} className="overflow-hidden">
               <CardContent className="p-4">
                 <div className="flex flex-col space-y-4">
                   <div className="flex flex-col md:flex-row md:items-center md:justify-between">
@@ -258,7 +266,7 @@ export default function ViewedJobsPage() {
                           ? 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800' 
                           : ''
                       }`}
-                      onClick={() => updateJobStatus(viewedJob.id, 'viewed')}
+                      onClick={() => updateJobStatus(viewedJob.job_id, 'viewed')}
                       disabled={viewedJob.status === 'viewed'}
                     >
                       <Eye className="h-4 w-4" />
@@ -272,7 +280,7 @@ export default function ViewedJobsPage() {
                           ? 'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:border-green-800' 
                           : ''
                       }`}
-                      onClick={() => updateJobStatus(viewedJob.id, 'applied')}
+                      onClick={() => updateJobStatus(viewedJob.job_id, 'applied')}
                       disabled={viewedJob.status === 'applied'}
                     >
                       <CheckCircle className="h-4 w-4" />
@@ -286,7 +294,7 @@ export default function ViewedJobsPage() {
                           ? 'bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:border-red-800' 
                           : ''
                       }`}
-                      onClick={() => updateJobStatus(viewedJob.id, 'ignored')}
+                      onClick={() => updateJobStatus(viewedJob.job_id, 'ignored')}
                       disabled={viewedJob.status === 'ignored'}
                     >
                       <XCircle className="h-4 w-4" />

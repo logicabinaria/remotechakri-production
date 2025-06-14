@@ -7,6 +7,7 @@ import { formatDistanceToNow } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import { Building, MapPin, Clock } from "lucide-react";
 import type { JobWithRelations } from "@/lib/supabase";
+import { JobBookmarkButton } from "./job-bookmark-button";
 
 interface JobCompactCardProps {
   job: JobWithRelations;
@@ -57,9 +58,17 @@ export function JobCompactCard({ job, featured = false }: JobCompactCardProps) {
                 </Badge>
               )}
             </div>
-            <p className="text-sm text-gray-600 dark:text-gray-400 truncate">
-              {job.company_name}
-            </p>
+            <div className="flex justify-between items-start">
+              <div className="text-sm text-gray-500 dark:text-gray-400 truncate">{job.company_name}</div>
+              <div className="flex-shrink-0 ml-2">
+                <JobBookmarkButton 
+                  jobId={job.id} 
+                  variant="ghost" 
+                  size="sm" 
+                  showText={false} 
+                />
+              </div>
+            </div>
           </div>
         </div>
         
@@ -97,12 +106,14 @@ export function JobCompactCard({ job, featured = false }: JobCompactCardProps) {
               </Badge>
             </React.Fragment>
           )}
-          {job.tags && job.tags.length > 0 && job.tags.slice(0, 3).map((tag) => (
-            <React.Fragment key={`tag-fragment-${tag.id}`}>
-              <Badge variant="outline" className="text-xs py-1 px-3 rounded-full border-gray-200 text-gray-700 bg-gray-50 hover:bg-gray-100 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700">
-                {tag.name}
-              </Badge>
-            </React.Fragment>
+          {job.tags && job.tags.length > 0 && job.tags.slice(0, 3).map((tag, index) => (
+            <Badge 
+              key={`tag-${tag.id || index}`}
+              variant="outline" 
+              className="text-xs py-1 px-3 rounded-full border-gray-200 text-gray-700 bg-gray-50 hover:bg-gray-100 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700"
+            >
+              {tag.name}
+            </Badge>
           ))}
           {job.tags && job.tags.length > 3 && (
             <React.Fragment key="more-tags-fragment">

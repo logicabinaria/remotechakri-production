@@ -29,15 +29,24 @@ export function ThemeProvider({
   storageKey = "remotechakri-theme",
   ...props
 }: ThemeProviderProps) {
-  const [theme, setTheme] = useState<Theme>(
-    () => (typeof window !== "undefined" ? 
-      (localStorage.getItem(storageKey) as Theme) || defaultTheme : 
-      defaultTheme)
-  );
+  // Start with defaultTheme to avoid hydration mismatch
+  const [theme, setTheme] = useState<Theme>(defaultTheme);
+  const [mounted, setMounted] = useState(false);
 
+  // Once mounted on client, update theme from localStorage
   useEffect(() => {
-    const root = window.document.documentElement;
+    const savedTheme = localStorage.getItem(storageKey) as Theme;
+    if (savedTheme) {
+      setTheme(savedTheme);
+    }
+    setMounted(true);
+  }, [storageKey]);
+
+  // Apply theme class to document
+  useEffect(() => {
+    if (!mounted) return;
     
+    const root = window.document.documentElement;
     root.classList.remove("light", "dark");
     
     if (theme === "system") {
@@ -51,7 +60,7 @@ export function ThemeProvider({
     }
     
     root.classList.add(theme);
-  }, [theme]);
+  }, [theme, mounted]);
 
   const value = {
     theme,

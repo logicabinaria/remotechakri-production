@@ -117,20 +117,27 @@ export async function middleware(request: NextRequest) {
     if (currentPath.startsWith('/dashboard') && session) {
       // Get user profile to check verification status
       // Set headers for the request
-      const { data: profile, error: profileError } = await supabase
-        .from('user_profiles')
-        .select('is_whatsapp_verified')
-        .eq('user_id', user?.id || session.user.id)
-        .single();
+      // Check if WhatsApp verification is enabled via environment variable
+      const enableWhatsAppVerification = process.env.NEXT_PUBLIC_ENABLE_WHATSAPP_VERIFICATION === 'true';
       
-      if (profileError) {
-        console.error('Error checking verification status:', profileError);
-      } else if (!profile || !profile.is_whatsapp_verified) {
-        console.log('User not verified, redirecting to verification page');
-        // Only redirect if not already on the verify page
-        if (!currentPath.includes('/dashboard/verify')) {
-          return NextResponse.redirect(new URL('/dashboard/verify', request.url));
+      if (enableWhatsAppVerification) {
+        const { data: profile, error: profileError } = await supabase
+          .from('user_profiles')
+          .select('is_whatsapp_verified')
+          .eq('user_id', user?.id || session.user.id)
+          .single();
+        
+        if (profileError) {
+          console.error('Error checking verification status:', profileError);
+        } else if (!profile || !profile.is_whatsapp_verified) {
+          console.log('User not verified, redirecting to verification page');
+          // Only redirect if not already on the verify page
+          if (!currentPath.includes('/dashboard/verify')) {
+            return NextResponse.redirect(new URL('/dashboard/verify', request.url));
+          }
         }
+      } else {
+        console.log('WhatsApp verification is disabled via environment variable');
       }
     }
     

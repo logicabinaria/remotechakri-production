@@ -9,7 +9,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
-// No need to import the layout here as Next.js will automatically use the layout.tsx in the parent folder
 
 export default function DashboardVerifyPage() {
   const router = useRouter();
@@ -24,6 +23,18 @@ export default function DashboardVerifyPage() {
   const [success, setSuccess] = useState<string | null>(null);
   const [countdown, setCountdown] = useState(0);
   const [isVerified, setIsVerified] = useState(false);
+  const [isWhatsAppVerificationEnabled, setIsWhatsAppVerificationEnabled] = useState(true);
+  
+  // Check if WhatsApp verification is enabled
+  useEffect(() => {
+    const enableWhatsAppVerification = process.env.NEXT_PUBLIC_ENABLE_WHATSAPP_VERIFICATION === 'true';
+    setIsWhatsAppVerificationEnabled(enableWhatsAppVerification);
+    
+    // If WhatsApp verification is disabled, redirect to dashboard
+    if (!enableWhatsAppVerification) {
+      router.push('/dashboard');
+    }
+  }, [router]);
 
   // Check if user is logged in and get their details
   useEffect(() => {
@@ -194,9 +205,36 @@ export default function DashboardVerifyPage() {
     }
   };
 
-  const renderContent = () => {
-    if (isVerified) {
-      return (
+  // If WhatsApp verification is disabled, show a message
+  if (!isWhatsAppVerificationEnabled) {
+    return (
+      <div className="container max-w-3xl py-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-center">WhatsApp Verification</CardTitle>
+            <CardDescription className="text-center">
+              WhatsApp verification is currently disabled
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="flex flex-col items-center justify-center p-6">
+            <p className="text-lg font-medium text-center">WhatsApp verification is temporarily disabled.</p>
+            <p className="text-sm text-gray-500 text-center mt-2">You can continue using the platform without verification.</p>
+            <Button 
+              className="mt-4" 
+              onClick={() => router.push('/dashboard')}
+            >
+              Return to Dashboard
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // If user is already verified, show success message
+  if (isVerified) {
+    return (
+      <div className="container max-w-3xl py-6">
         <Card>
           <CardHeader>
             <CardTitle className="text-center">Verify Your WhatsApp</CardTitle>
@@ -204,23 +242,33 @@ export default function DashboardVerifyPage() {
               We recommend verifying your WhatsApp number for a better experience
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            {success && (
-              <Alert className="mb-4 bg-green-50 border-green-200">
-                <CheckCircle2 className="h-4 w-4 text-green-600" />
-                <AlertDescription className="text-green-600">{success}</AlertDescription>
-              </Alert>
-            )}
-            <div className="flex items-center justify-center">
-              <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            </div>
-            <p className="text-center mt-4">Redirecting to dashboard...</p>
+          <CardContent className="flex flex-col items-center justify-center p-6">
+            <CheckCircle2 className="h-16 w-16 text-green-500 mb-4" />
+            <p className="text-lg font-medium text-center">Your WhatsApp number is verified!</p>
+            <p className="text-sm text-gray-500 text-center mt-2">You&apos;re all set to receive notifications.</p>
           </CardContent>
         </Card>
-      );
-    }
+      </div>
+    );
+  }
 
-    return (
+  // Default view - verification form
+  return (
+    <div className="container max-w-3xl py-6">
+      {error && (
+        <Alert className="mb-4 bg-red-50 border-red-200">
+          <AlertCircle className="h-4 w-4 text-red-600" />
+          <AlertDescription className="text-red-700">{error}</AlertDescription>
+        </Alert>
+      )}
+      
+      {success && (
+        <Alert className="mb-4 bg-green-50 border-green-200">
+          <CheckCircle2 className="h-4 w-4 text-green-600" />
+          <AlertDescription className="text-green-700">{success}</AlertDescription>
+        </Alert>
+      )}
+      
       <Card>
         <CardHeader>
           <CardTitle className="text-center">Verify Your WhatsApp</CardTitle>
@@ -229,20 +277,6 @@ export default function DashboardVerifyPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {error && (
-            <Alert className="mb-4 bg-red-50 border-red-200">
-              <AlertCircle className="h-4 w-4 text-red-600" />
-              <AlertDescription className="text-red-600">{error}</AlertDescription>
-            </Alert>
-          )}
-          
-          {success && (
-            <Alert className="mb-4 bg-green-50 border-green-200">
-              <CheckCircle2 className="h-4 w-4 text-green-600" />
-              <AlertDescription className="text-green-600">{success}</AlertDescription>
-            </Alert>
-          )}
-          
           <div className="space-y-4">
             <div>
               <Label htmlFor="phone">Your WhatsApp Number</Label>
@@ -313,12 +347,6 @@ export default function DashboardVerifyPage() {
           </div>
         </CardContent>
       </Card>
-    );
-  };
-
-  return (
-    <div className="max-w-md mx-auto py-8">
-      {renderContent()}
     </div>
   );
 }

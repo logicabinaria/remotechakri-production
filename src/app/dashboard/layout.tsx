@@ -145,11 +145,15 @@ export default function DashboardLayout({
     );
   }
 
+  // Get WhatsApp verification toggle from environment variable
+  const enableWhatsAppVerification = process.env.NEXT_PUBLIC_ENABLE_WHATSAPP_VERIFICATION === 'true';
+
   const navItems = [
     { name: 'Dashboard', href: '/dashboard', icon: <LayoutDashboard className="h-5 w-5" /> },
     { name: 'My Jobs', href: '/dashboard/my-jobs', icon: <Bookmark className="h-5 w-5" /> },
     { name: 'Viewed Jobs', href: '/dashboard/viewed-jobs', icon: <Eye className="h-5 w-5" /> },
-    { name: 'Verify WhatsApp', href: '/dashboard/verify', icon: <Phone className="h-5 w-5" /> },
+    // Only show WhatsApp verification menu if the feature is enabled
+    ...(enableWhatsAppVerification ? [{ name: 'Verify WhatsApp', href: '/dashboard/verify', icon: <Phone className="h-5 w-5" /> }] : []),
     { name: 'Settings', href: '/dashboard/settings', icon: <Settings className="h-5 w-5" /> },
   ];
 
