@@ -1,6 +1,7 @@
 "use client";
 
-import Link from "next/link";
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import Image from "next/image";
 import { useState, useEffect } from "react";
 import { Menu, X, User, Home, LogOut, Settings, Bookmark, Eye, Briefcase, Grid, MapPin, LogIn, UserPlus } from "lucide-react";
@@ -21,6 +22,12 @@ export function PublicHeader() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userInitials, setUserInitials] = useState("");
   const supabase = useSupabase();
+  const router = useRouter();
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    router.push('/');
+  };
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -153,10 +160,10 @@ export function PublicHeader() {
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
-                    <Link href="/api/auth/signout" className="flex items-center gap-2 cursor-pointer text-destructive">
+                  <DropdownMenuItem onClick={handleSignOut}>
+                    <div className="flex items-center gap-2 cursor-pointer text-destructive">
                       <LogOut className="h-4 w-4" /> Logout
-                    </Link>
+                    </div>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -234,13 +241,16 @@ export function PublicHeader() {
                   >
                     <User className="h-4 w-4" /> Dashboard
                   </Link>
-                  <Link 
-                    href="/api/auth/signout" 
-                    className="text-destructive hover:text-destructive/80 transition-colors flex items-center gap-2"
-                    onClick={() => setMobileMenuOpen(false)}
+                  <button
+                    className="text-destructive hover:text-destructive/80 transition-colors flex items-center gap-2 text-left w-full"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setMobileMenuOpen(false);
+                      handleSignOut();
+                    }}
                   >
                     <LogOut className="h-4 w-4" /> Logout
-                  </Link>
+                  </button>
                 </>
               ) : (
                 <div className="flex flex-col space-y-2">
