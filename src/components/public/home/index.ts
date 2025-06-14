@@ -6,3 +6,4 @@ export { LocationsSection } from './locations-section';
 export { PopularTagsSection } from './popular-tags-section';
 export { CtaSection } from './cta-section';
 export { SearchSidebar } from './search-sidebar';
+export { BlogSection } from './blog-section';

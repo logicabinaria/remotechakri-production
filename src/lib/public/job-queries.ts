@@ -73,6 +73,9 @@ interface GetLatestJobsOptions {
   jobTypeSlug?: string;
   searchQuery?: string;
   tagSlug?: string;
+  tagSlugs?: string[];
+  datePosted?: string;
+  sortBy?: string;
 }
 
 /**
@@ -89,7 +92,10 @@ export async function getLatestJobs(options: GetLatestJobsOptions = {}): Promise
     locationSlug, 
     jobTypeSlug,
     searchQuery,
-    tagSlug 
+    tagSlug,
+    tagSlugs = [],
+    datePosted,
+    sortBy = 'newest'
   } = options;
   // Calculate offset based on page and limit
   const offset = (page - 1) * limit;
@@ -188,20 +194,33 @@ export async function getLatestJobs(options: GetLatestJobsOptions = {}): Promise
     .eq('is_published', true)
     .is('deleted_at', null)
     .or(`expires_at.is.null,expires_at.gt.${new Date().toISOString()}`);
+
+  // Apply date posted filter if provided
+  if (datePosted) {
+    const now = new Date();
+    let dateFilter: Date;
     
-  // Apply filters if provided
-  if (categorySlug) {
-    // First get the category ID from the slug
-    const { data: categoryData } = await supabase
-      .from('categories')
-      .select('id')
-      .eq('slug', categorySlug)
-      .single();
-      
-    if (categoryData?.id) {
-      query = query.eq('category_id', categoryData.id);
+    switch(datePosted) {
+      case '24h':
+        dateFilter = new Date(now.setHours(now.getHours() - 24));
+        break;
+      case '3d':
+        dateFilter = new Date(now.setDate(now.getDate() - 3));
+        break;
+      case '7d':
+        dateFilter = new Date(now.setDate(now.getDate() - 7));
+        break;
+      case '30d':
+        dateFilter = new Date(now.setMonth(now.getMonth() - 1));
+        break;
+      default:
+        dateFilter = new Date(0); // Default to epoch if invalid value
     }
+    
+    query = query.gte('posted_at', dateFilter.toISOString());
   }
+  
+  // No experience level filter as it's not in the database schema
   
   if (locationSlug) {
     // First get the location ID from the slug
@@ -234,6 +253,7 @@ export async function getLatestJobs(options: GetLatestJobsOptions = {}): Promise
     query = query.or(`title.ilike.${searchTerm},description.ilike.${searchTerm}`);
   }
   
+  // Apply tag filter if provided (single tag)
   if (tagSlug) {
     // First get the tag ID from the slug
     const { data: tagData } = await supabase
@@ -243,26 +263,75 @@ export async function getLatestJobs(options: GetLatestJobsOptions = {}): Promise
       .single();
       
     if (tagData?.id) {
-      // Use a subquery to find jobs with this tag
-      const { data: jobsWithTag } = await supabase
+      // Get job IDs that have this tag
+      const { data: jobTagsData } = await supabase
         .from('job_tags')
         .select('job_id')
         .eq('tag_id', tagData.id);
         
-      if (jobsWithTag && jobsWithTag.length > 0) {
-        const jobIds = jobsWithTag.map(item => item.job_id);
+      if (jobTagsData && jobTagsData.length > 0) {
+        const jobIds = jobTagsData.map(jt => jt.job_id);
         query = query.in('id', jobIds);
       } else {
-        // If no jobs found with this tag, return empty result
+        // If no jobs have this tag, return empty result
+        return { jobs: [], total: 0 };
+      }
+    } else {
+      // If tag not found, return empty result
+      return { jobs: [], total: 0 };
+    }
+  }
+  
+  // Apply multiple tags filter if provided
+  if (tagSlugs.length > 0) {
+    // Get tag IDs from slugs
+    const { data: tagsData } = await supabase
+      .from('tags')
+      .select('id')
+      .in('slug', tagSlugs);
+      
+    if (tagsData && tagsData.length > 0) {
+      const tagIds = tagsData.map(tag => tag.id);
+      
+      // Get job IDs that have any of these tags
+      const { data: jobTagsData } = await supabase
+        .from('job_tags')
+        .select('job_id')
+        .in('tag_id', tagIds);
+        
+      if (jobTagsData && jobTagsData.length > 0) {
+        // Create a unique array of job IDs
+        const jobIds = Array.from(new Set(jobTagsData.map(jt => jt.job_id)));
+        query = query.in('id', jobIds);
+      } else {
+        // If no jobs have these tags, return empty result
         return { jobs: [], total: 0 };
       }
     }
   }
+
+  // Apply sorting
+  switch (sortBy) {
+    case 'oldest':
+      query = query.order('posted_at', { ascending: true });
+      break;
+    case 'salary_high':
+      query = query.order('salary_max', { ascending: false });
+      break;
+    case 'salary_low':
+      query = query.order('salary_min', { ascending: true });
+      break;
+    case 'newest':
+    default:
+      query = query.order('posted_at', { ascending: false });
+      break;
+  }
   
-  // Complete the query with ordering and pagination
-  const { data, error } = await query
-    .order('posted_at', { ascending: false })
-    .range(offset, offset + limit - 1);
+  // Apply pagination
+  query = query.range(offset, offset + limit - 1);
+  
+  // Execute the query
+  const { data, error } = await query;
 
   if (error) {
     console.error('Error fetching latest jobs:', error);

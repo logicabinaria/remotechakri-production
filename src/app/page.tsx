@@ -9,9 +9,8 @@ export const dynamic = 'force-dynamic';
 import { PublicLayout } from "@/components/public/layout/public-layout";
 import { getFeaturedJobs } from "@/lib/public/job-queries";
 import { getRecentJobs } from "@/lib/public/recent-job-queries";
-import { getAllCategories, getAllLocations, getPopularTags, getAllJobTypes } from "@/lib/public/taxonomy-queries";
+import { getAllCategories, getAllLocations, getPopularTags } from "@/lib/public/taxonomy-queries";
 import { generateMetadata } from "@/components/public/seo/metadata";
-import type { Category, Location } from "@/lib/supabase";
 import {
   HeroSection,
   FeaturedJobsSection,
@@ -20,7 +19,7 @@ import {
   LocationsSection,
   PopularTagsSection,
   CtaSection,
-  SearchSidebar
+  BlogSection
 } from "@/components/public/home";
 
 // Generate metadata for SEO
@@ -52,47 +51,49 @@ export default async function Home() {
   // Fetch popular tags
   const popularTags = await getPopularTags(12);
   
-  // Fetch job types for search sidebar
-  const jobTypes = await getAllJobTypes();
-  
   return (
     <PublicLayout>
-      {/* Hero Section - Full Width */}
+      {/* Hero Section */}
       <HeroSection />
       
-      {/* Two Column Layout - Main Content + Sidebar */}
-      <div className="w-full max-w-[1600px] mx-auto px-4 md:px-6 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6">
-          {/* Main Content - 8 columns on desktop */}
-          <main className="lg:col-span-8 order-2 lg:order-1">
-            {/* Featured Jobs Section */}
-            <FeaturedJobsSection featuredJobs={featuredJobs} />
-            
-            {/* Browse By Category Section */}
-            <CategoriesSection categories={topCategories} />
-            
-            {/* Recent Jobs Section */}
-            <RecentJobsSection initialJobs={recentJobs} totalJobs={totalRecentJobs} />
-            
-            {/* Browse By Location Section */}
-            <LocationsSection locations={topLocations} />
-            
-            {/* Popular Tags Section */}
-            <PopularTagsSection tags={popularTags} />
-          </main>
-          
-          {/* Sidebar - 4 columns on desktop */}
-          <aside className="lg:col-span-4 order-1 lg:order-2">
-            <SearchSidebar 
-              categories={categories as (Category & { job_count: number })[]} 
-              locations={locations as (Location & { job_count: number })[]} 
-              jobTypes={jobTypes} 
-            />
-          </aside>
-        </div>
+      {/* Main Content - Full Width Sections */}
+      <div className="w-full max-w-[1600px] mx-auto px-4 md:px-6 py-8 space-y-16">
+        {/* Featured Jobs Section */}
+        <section>
+          <FeaturedJobsSection featuredJobs={featuredJobs} />
+        </section>
+        
+        {/* Browse By Category Section */}
+        <section>
+          <CategoriesSection categories={topCategories} />
+        </section>
+        
+        {/* Recent Jobs Section */}
+        <section>
+          <RecentJobsSection initialJobs={recentJobs} totalJobs={totalRecentJobs} />
+        </section>
+        
+        {/* Blog Section */}
+        <section>
+          <div className="mb-8">
+            <h2 className="text-3xl font-bold tracking-tight">Latest Articles</h2>
+            <p className="text-muted-foreground mt-2">Stay updated with the latest remote work trends and tips</p>
+          </div>
+          <BlogSection />
+        </section>
+        
+        {/* Browse By Location Section */}
+        <section>
+          <LocationsSection locations={topLocations} />
+        </section>
+        
+        {/* Popular Tags Section */}
+        <section>
+          <PopularTagsSection tags={popularTags} />
+        </section>
       </div>
       
-      {/* CTA Section - Full Width */}
+      {/* CTA Section */}
       <CtaSection />
     </PublicLayout>
   );
