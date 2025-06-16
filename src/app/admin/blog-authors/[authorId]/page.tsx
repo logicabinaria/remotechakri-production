@@ -1,5 +1,7 @@
 "use client";
 
+export const runtime = 'edge';
+
 import { useState, useEffect } from "react";
 import { BlogAuthor } from "../components/author-list";
 import { useParams, useRouter } from "next/navigation";
