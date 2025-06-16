@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import Image from "next/image";
 import { useState, useEffect } from "react";
-import { Menu, X, User, Home, LogOut, Settings, Bookmark, Eye, Briefcase, Grid, MapPin, LogIn, UserPlus } from "lucide-react";
+import { Menu, X, User, Home, LogOut, Settings, Bookmark, Eye, Briefcase, Grid, MapPin, LogIn, UserPlus, FileText, ChevronDown, BookOpen, Scale } from "lucide-react";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { useSupabase } from "@/components/providers/supabase-provider";
@@ -35,21 +35,47 @@ export function PublicHeader() {
       setIsAuthenticated(!!session);
       
       if (session?.user) {
-        const { data: profile } = await supabase
-          .from('user_profiles')
-          .select('full_name')
-          .eq('user_id', session.user.id)
-          .single();
-        
-        if (profile?.full_name) {
-          // Split the full name and get initials from first and last parts
-          const nameParts = profile.full_name.split(' ');
-          const firstInitial = nameParts[0]?.[0] || '';
-          const lastInitial = nameParts.length > 1 ? nameParts[nameParts.length - 1]?.[0] || '' : '';
-          const initials = `${firstInitial}${lastInitial}`;
-          setUserInitials(initials.toUpperCase());
-        } else {
-          setUserInitials(session.user.email?.[0].toUpperCase() || 'U');
+        try {
+          // First check if user is an admin
+          const { data: adminData } = await supabase
+            .from('admins')
+            .select('name')
+            .eq('user_id', session.user.id)
+            .single();
+          
+          if (adminData?.name) {
+            // Admin user found, use admin name
+            const nameParts = adminData.name.split(' ');
+            const firstInitial = nameParts[0]?.[0] || '';
+            const lastInitial = nameParts.length > 1 ? nameParts[nameParts.length - 1]?.[0] || '' : '';
+            const initials = `${firstInitial}${lastInitial}`;
+            setUserInitials(initials.toUpperCase());
+          } else {
+            // Not an admin, try regular user profile
+            const { data: profile } = await supabase
+              .from('user_profiles')
+              .select('full_name')
+              .eq('user_id', session.user.id)
+              .single();
+            
+            if (profile?.full_name) {
+              // Split the full name and get initials from first and last parts
+              const nameParts = profile.full_name.split(' ');
+              const firstInitial = nameParts[0]?.[0] || '';
+              const lastInitial = nameParts.length > 1 ? nameParts[nameParts.length - 1]?.[0] || '' : '';
+              const initials = `${firstInitial}${lastInitial}`;
+              setUserInitials(initials.toUpperCase());
+            }
+          }
+        } catch (error) {
+          console.error('Error fetching user profile:', error);
+          // Use email as fallback
+          if (session.user.email) {
+            const initial = session.user.email[0].toUpperCase();
+            setUserInitials(initial);
+          } else {
+            setUserInitials('U');
+          }
         }
       }
     };
@@ -121,6 +147,29 @@ export function PublicHeader() {
             >
               <MapPin className="h-4 w-4" /> Locations
             </Link>
+            <Link 
+              href="/blog" 
+              className="text-gray-600 hover:text-primary dark:text-gray-300 dark:hover:text-primary transition-colors flex items-center gap-1"
+            >
+              <BookOpen className="h-4 w-4" /> Blog
+            </Link>
+            <DropdownMenu>
+              <DropdownMenuTrigger className="text-gray-600 hover:text-primary dark:text-gray-300 dark:hover:text-primary transition-colors flex items-center gap-1">
+                <Scale className="h-4 w-4" /> Legal <ChevronDown className="h-3 w-3 ml-1" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuItem asChild>
+                  <Link href="/privacy-policy" className="flex items-center gap-2 cursor-pointer">
+                    <FileText className="h-4 w-4" /> Privacy Policy
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/terms-and-conditions" className="flex items-center gap-2 cursor-pointer">
+                    <FileText className="h-4 w-4" /> Terms and Conditions
+                  </Link>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </nav>
 
           {/* Right side actions */}
@@ -232,6 +281,34 @@ export function PublicHeader() {
               >
                 <MapPin className="h-4 w-4" /> Locations
               </Link>
+              <Link 
+                href="/blog" 
+                className="text-gray-600 hover:text-primary dark:text-gray-300 dark:hover:text-primary transition-colors flex items-center gap-2"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <BookOpen className="h-4 w-4" /> Blog
+              </Link>
+              <div className="border-t border-gray-200 dark:border-gray-700 pt-2 mt-2">
+                <div className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2 flex items-center gap-2">
+                  <Scale className="h-4 w-4" /> Legal
+                </div>
+                <div className="pl-6 flex flex-col space-y-3">
+                  <Link 
+                    href="/privacy-policy" 
+                    className="text-gray-600 hover:text-primary dark:text-gray-300 dark:hover:text-primary transition-colors flex items-center gap-2"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <FileText className="h-4 w-4" /> Privacy Policy
+                  </Link>
+                  <Link 
+                    href="/terms-and-conditions" 
+                    className="text-gray-600 hover:text-primary dark:text-gray-300 dark:hover:text-primary transition-colors flex items-center gap-2"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <FileText className="h-4 w-4" /> Terms and Conditions
+                  </Link>
+                </div>
+              </div>
               {isAuthenticated ? (
                 <>
                   <Link 

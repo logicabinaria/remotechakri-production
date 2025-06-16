@@ -11,9 +11,11 @@ import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle, ArrowLeft, Loader2 } from "lucide-react";
+import { LegalModal, useTermsModal, usePrivacyModal } from "@/components/public/legal/legal-modals";
 
 // Country codes for phone numbers
 const countryCodes = [
@@ -31,8 +33,8 @@ const countryCodes = [
 
 export default function RegisterPage() {
   const router = useRouter();
-  const supabase = useSupabase();
   useTheme(); // Keep the hook for theme toggle functionality
+  const supabase = useSupabase();
   
   // Form state
   const [fullName, setFullName] = useState("");
@@ -40,18 +42,28 @@ export default function RegisterPage() {
   const [password, setPassword] = useState("");
   const [countryCode, setCountryCode] = useState("+880"); // Default to Bangladesh
   const [phoneNumber, setPhoneNumber] = useState("");
+  const [termsAccepted, setTermsAccepted] = useState(false);
+  const [privacyAccepted, setPrivacyAccepted] = useState(false);
   
   // UI state
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
+  // Legal modals
+  const termsModal = useTermsModal();
+  const privacyModal = usePrivacyModal();
+  
   // Check if user is already logged in
   useEffect(() => {
     const checkUserSession = async () => {
-      const { data } = await supabase.auth.getSession();
-      
-      if (data.session) {
-        router.push('/dashboard');
+      try {
+        const { data } = await supabase.auth.getSession();
+        
+        if (data?.session) {
+          router.push('/dashboard');
+        }
+      } catch (error) {
+        console.error('Error checking session:', error);
       }
     };
     checkUserSession();
@@ -61,6 +73,13 @@ export default function RegisterPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    
+    // Validate terms and privacy policy acceptance
+    if (!termsAccepted || !privacyAccepted) {
+      setError("You must accept the Terms and Conditions and Privacy Policy to create an account.");
+      return;
+    }
+    
     setLoading(true);
     
     try {
@@ -249,6 +268,59 @@ export default function RegisterPage() {
                 </p>
               </div>
               
+              {/* Terms and Privacy Policy Checkboxes */}
+              <div className="space-y-3">
+                <div className="flex items-center space-x-2">
+                  <Checkbox 
+                    id="terms" 
+                    checked={termsAccepted}
+                    onCheckedChange={(checked) => setTermsAccepted(checked === true)}
+                    disabled={loading}
+                  />
+                  <Label 
+                    htmlFor="terms" 
+                    className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  >
+                    I agree to the{" "}
+                    <button 
+                      type="button" 
+                      className="text-primary hover:underline font-medium"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        termsModal.openModal();
+                      }}
+                    >
+                      Terms and Conditions
+                    </button>
+                  </Label>
+                </div>
+                
+                <div className="flex items-center space-x-2">
+                  <Checkbox 
+                    id="privacy" 
+                    checked={privacyAccepted}
+                    onCheckedChange={(checked) => setPrivacyAccepted(checked === true)}
+                    disabled={loading}
+                  />
+                  <Label 
+                    htmlFor="privacy" 
+                    className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  >
+                    I agree to the{" "}
+                    <button 
+                      type="button" 
+                      className="text-primary hover:underline font-medium"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        privacyModal.openModal();
+                      }}
+                    >
+                      Privacy Policy
+                    </button>
+                  </Label>
+                </div>
+              </div>
+              
               <Button type="submit" className="w-full" disabled={loading}>
                 {loading ? (
                   <>
@@ -283,6 +355,21 @@ export default function RegisterPage() {
           </CardFooter>
         </Card>
       </div>
+      
+      {/* Legal Modals */}
+      <LegalModal 
+        title="Terms and Conditions"
+        content={termsModal.content}
+        isOpen={termsModal.isOpen}
+        onClose={termsModal.closeModal}
+      />
+      
+      <LegalModal 
+        title="Privacy Policy"
+        content={privacyModal.content}
+        isOpen={privacyModal.isOpen}
+        onClose={privacyModal.closeModal}
+      />
     </div>
   );
 }

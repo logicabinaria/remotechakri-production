@@ -6,6 +6,7 @@ import { ThemeProvider } from "@/components/providers/theme-provider";
 import { LoadingProvider } from "@/components/providers/loading-provider";
 import { ThemeScript } from "@/components/theme-script";
 import { Toaster } from "@/components/ui/toaster";
+import GoogleAnalytics from "@/components/analytics/google-analytics";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -32,6 +33,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head>
         <ThemeScript />
+        <GoogleAnalytics />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}

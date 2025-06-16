@@ -3,6 +3,7 @@
 import { ReactNode } from "react";
 import { PublicHeader } from "./public-header";
 import { PublicFooter } from "./public-footer";
+import { CookieConsent } from "@/components/public/cookie-consent";
 
 interface PublicLayoutProps {
   children: ReactNode;
@@ -16,6 +17,7 @@ export function PublicLayout({ children }: PublicLayoutProps) {
         {children}
       </main>
       <PublicFooter />
+      <CookieConsent />
     </div>
   );
 }

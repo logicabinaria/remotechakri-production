@@ -57,20 +57,20 @@ export function CtaSection() {
           {/* Right column - Stats */}
           <div className="grid grid-cols-2 gap-6">
             <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
-              <div className="text-4xl font-bold text-primary mb-2">1,000+</div>
+              <div className="text-4xl font-bold text-primary mb-2">5,00+</div>
               <div className="text-gray-600 dark:text-gray-300">Remote Jobs</div>
             </div>
             <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
-              <div className="text-4xl font-bold text-primary mb-2">500+</div>
+              <div className="text-4xl font-bold text-primary mb-2">100+</div>
               <div className="text-gray-600 dark:text-gray-300">Companies</div>
             </div>
             <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
-              <div className="text-4xl font-bold text-primary mb-2">50+</div>
+              <div className="text-4xl font-bold text-primary mb-2">20+</div>
               <div className="text-gray-600 dark:text-gray-300">Categories</div>
             </div>
             <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
-              <div className="text-4xl font-bold text-primary mb-2">24/7</div>
-              <div className="text-gray-600 dark:text-gray-300">Support</div>
+              <div className="text-4xl font-bold text-primary mb-2">100%</div>
+              <div className="text-gray-600 dark:text-gray-300">Free Access</div>
             </div>
           </div>
         </div>

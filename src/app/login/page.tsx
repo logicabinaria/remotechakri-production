@@ -7,8 +7,7 @@ import Image from "next/image";
 import { useTheme } from "@/components/providers/theme-provider";
 import { useSupabase } from "@/components/providers/supabase-provider";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
-import { Auth } from "@supabase/auth-ui-react";
-import { ThemeSupa } from "@supabase/auth-ui-shared";
+import { Session } from "@supabase/supabase-js";
 import {
   Card,
   CardContent,
@@ -18,15 +17,94 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { ArrowLeft, CheckCircle2 } from "lucide-react";
-import { Session } from "@supabase/supabase-js";
+import { ArrowLeft, CheckCircle2, AlertCircle } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { PasswordInput } from "@/components/ui/password-input";
+import { useForm } from "react-hook-form";
+
+interface LoginFormData {
+  email: string;
+  password: string;
+}
 
 export default function LoginPage() {
   const router = useRouter();
   const supabase = useSupabase();
-  const { theme } = useTheme();
+  useTheme(); // Keep the hook for theme functionality
   const [registrationSuccess, setRegistrationSuccess] = useState(false);
   const [registrationEmail, setRegistrationEmail] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  
+  const { register, handleSubmit, formState: { errors } } = useForm<LoginFormData>();
+  
+  const onSubmit = async (data: LoginFormData) => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      // Sign in with email and password
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: data.email,
+        password: data.password,
+      });
+      
+      if (signInError) {
+        throw signInError;
+      }
+      
+      // Get authenticated user data
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      
+      if (userError || !user) {
+        throw new Error('Error getting authenticated user');
+      }
+      
+      // Create user profile if it doesn't exist
+      const { error: profileError } = await supabase
+        .from('user_profiles')
+        .upsert({
+          user_id: user.id,
+          full_name: user.user_metadata?.full_name || '',
+          avatar_url: user.user_metadata?.avatar_url || '',
+        }, { onConflict: 'user_id' });
+      
+      if (profileError) {
+        console.error('Error creating user profile:', profileError);
+      }
+      
+      // Check if WhatsApp verification is enabled via environment variable
+      const enableWhatsAppVerification = process.env.NEXT_PUBLIC_ENABLE_WHATSAPP_VERIFICATION === 'true';
+      
+      if (enableWhatsAppVerification) {
+        // Check if WhatsApp is verified
+        const { data: profileData } = await supabase
+          .from('user_profiles')
+          .select('is_whatsapp_verified')
+          .eq('user_id', user.id)
+          .single();
+          
+        // Set flag if WhatsApp is not verified to show the reminder
+        if (profileData && !profileData.is_whatsapp_verified) {
+          localStorage.setItem('whatsapp_verification_pending', 'true');
+        }
+      }
+      
+      // Redirect to dashboard
+      router.push('/dashboard');
+    } catch (error: unknown) {
+      console.error('Login error:', error);
+      setError(
+        error instanceof Error 
+          ? error.message 
+          : 'Failed to login. Please check your credentials.'
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // Check for registration success message
   useEffect(() => {
@@ -53,46 +131,50 @@ export default function LoginPage() {
   // Check if user is already logged in
   useEffect(() => {
     const checkUserSession = async () => {
-      const { data } = await supabase.auth.getSession();
-      
-      if (data.session) {
-        try {
-          // Create user profile if it doesn't exist
-          const { error: profileError } = await supabase
-            .from('user_profiles')
-            .upsert({
-              user_id: data.session.user.id,
-              full_name: data.session.user.user_metadata?.full_name || '',
-              avatar_url: data.session.user.user_metadata?.avatar_url || '',
-            }, { onConflict: 'user_id' });
-          
-          if (profileError) {
-            console.error('Error creating user profile:', profileError);
-          }
-          
-          // Check if WhatsApp verification is enabled via environment variable
-          const enableWhatsAppVerification = process.env.NEXT_PUBLIC_ENABLE_WHATSAPP_VERIFICATION === 'true';
-          
-          if (enableWhatsAppVerification) {
-            // Check if WhatsApp is verified
-            const { data: profileData } = await supabase
+      try {
+        const { data } = await supabase.auth.getSession();
+        
+        if (data?.session) {
+          try {
+            // Create user profile if it doesn't exist
+            const { error: profileError } = await supabase
               .from('user_profiles')
-              .select('is_whatsapp_verified')
-              .eq('user_id', data.session.user.id)
-              .single();
-              
-            // Set flag if WhatsApp is not verified to show the reminder
-            if (profileData && !profileData.is_whatsapp_verified) {
-              localStorage.setItem('whatsapp_verification_pending', 'true');
+              .upsert({
+                user_id: data.session.user.id,
+                full_name: data.session.user.user_metadata?.full_name || '',
+                avatar_url: data.session.user.user_metadata?.avatar_url || '',
+              }, { onConflict: 'user_id' });
+            
+            if (profileError) {
+              console.error('Error creating user profile:', profileError);
             }
+            
+            // Check if WhatsApp verification is enabled via environment variable
+            const enableWhatsAppVerification = process.env.NEXT_PUBLIC_ENABLE_WHATSAPP_VERIFICATION === 'true';
+            
+            if (enableWhatsAppVerification) {
+              // Check if WhatsApp is verified
+              const { data: profileData } = await supabase
+                .from('user_profiles')
+                .select('is_whatsapp_verified')
+                .eq('user_id', data.session.user.id)
+                .single();
+                
+              // Set flag if WhatsApp is not verified to show the reminder
+              if (profileData && !profileData.is_whatsapp_verified) {
+                localStorage.setItem('whatsapp_verification_pending', 'true');
+              }
+            }
+            
+            // Always redirect to dashboard - verification will be handled via the reminder component
+            router.push('/dashboard');
+          } catch (error) {
+            console.error('Authentication error:', error);
+            router.push('/dashboard');
           }
-          
-          // Always redirect to dashboard - verification will be handled via the reminder component
-          router.push('/dashboard');
-        } catch (error) {
-          console.error('Authentication error:', error);
-          router.push('/dashboard');
         }
+      } catch (error) {
+        console.error('Error checking session:', error);
       }
     };
     checkUserSession();
@@ -197,41 +279,71 @@ export default function LoginPage() {
             </div>
           )}
           <CardContent>
-            {/* Custom style to fix button visibility */}
-            <style jsx global>{`
-              .supabase-auth-ui_ui-button {
-                background-color: #f48e41 !important;
-                color: white !important;
-                opacity: 1 !important;
-                visibility: visible !important;
-              }
-              .supabase-auth-ui_ui-button:hover {
-                background-color: #e07d30 !important;
-              }
-            `}</style>
+            {error && (
+              <Alert variant="destructive" className="mb-4">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
             
-            <Auth
-              supabaseClient={supabase}
-              appearance={{ 
-                theme: ThemeSupa,
-                variables: {
-                  default: {
-                    colors: {
-                      brand: 'rgb(var(--color-primary))',
-                      brandAccent: 'rgb(var(--color-primary-dark))',
-                    },
-                  },
-                },
-                // Custom styles will be added via CSS
-              }}
-              theme={theme === 'dark' ? 'dark' : 'light'}
-              providers={[]}
-              redirectTo={typeof window !== 'undefined' ? `${window.location.origin}/auth/callback` : '/auth/callback'}
-              onlyThirdPartyProviders={false}
-              magicLink={false}
-              view="sign_in"
-              showLinks={true}
-            />
+            {registrationSuccess && (
+              <div className="mb-4">
+                <Alert className="bg-green-50 border-green-200">
+                  <CheckCircle2 className="h-4 w-4 text-green-600" />
+                  <AlertDescription className="text-green-700">
+                    Registration successful! {registrationEmail ? `You can now login with ${registrationEmail}` : 'You can now login with your email and password'}
+                  </AlertDescription>
+                </Alert>
+              </div>
+            )}
+            
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="your@email.com"
+                  {...register("email", { 
+                    required: "Email is required",
+                    pattern: {
+                      value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                      message: "Invalid email address"
+                    }
+                  })}
+                  className={errors.email ? "border-red-500" : ""}
+                />
+                {errors.email && (
+                  <p className="text-sm text-red-500">{errors.email.message}</p>
+                )}
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="password">Password</Label>
+                <PasswordInput
+                  id="password"
+                  placeholder="••••••••"
+                  {...register("password", { required: "Password is required" })}
+                  className={errors.password ? "border-red-500" : ""}
+                />
+                {errors.password && (
+                  <p className="text-sm text-red-500">{errors.password.message}</p>
+                )}
+              </div>
+              
+              <Button type="submit" className="w-full bg-primary hover:bg-primary-dark" disabled={isLoading}>
+                {isLoading ? "Logging in..." : "Login"}
+              </Button>
+              
+              <div className="text-center">
+                <Link 
+                  href="/register" 
+                  className="text-sm text-primary hover:underline"
+                >
+                  Don&apos;t have an account? Register
+                </Link>
+              </div>
+            </form>
             
             <div className="mt-4 text-center">
               <div className="mb-2">

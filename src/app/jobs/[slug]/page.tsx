@@ -30,6 +30,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Separator } from '@/components/ui/separator';
 import { PublicLayout } from '@/components/public/layout/public-layout';
+import { JobDisclaimer } from '@/components/public/jobs/job-disclaimer';
 import { JobStructuredData } from '@/components/public/seo/job-structured-data';
 import { getJobBySlug, getSimilarJobs } from '@/lib/public/job-queries';
 import { createDynamicMetadata } from '@/components/public/seo/metadata';
@@ -396,6 +397,11 @@ export default async function JobDetailsPage({ params }: { params: { slug: strin
                 </div>
               </CardContent>
             </Card>
+          </div>
+          
+          {/* Job Disclaimer */}
+          <div className="container mx-auto px-4 py-6">
+            <JobDisclaimer />
           </div>
         </div>
       </div>

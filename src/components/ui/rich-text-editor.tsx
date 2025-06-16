@@ -116,6 +116,8 @@ export function RichTextEditor({
       }),
     ],
     content: initialContent,
+    // Explicitly set immediatelyRender to false to avoid SSR hydration mismatches
+    immediatelyRender: false,
     onUpdate: ({ editor }) => {
       onChange(editor.getHTML());
     },

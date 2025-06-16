@@ -5,7 +5,7 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useSupabase } from "@/components/providers/supabase-provider";
 import { Button } from "@/components/ui/button";
-import { Building, Home, LogOut, Menu, Tag, MapPin, Briefcase, BarChart, MessageCircle, X, Users, FileText, ChevronDown, ChevronRight } from "lucide-react";
+import { Building, Home, LogOut, Menu, Tag, MapPin, Briefcase, BarChart, MessageCircle, X, Users, FileText, ChevronDown, ChevronRight, BookOpen, User } from "lucide-react";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
@@ -64,7 +64,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     await supabase.auth.signOut();
   };
 
-  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({ reports: true });
+  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({ reports: true, blog: true });
 
   const toggleSection = (section: string) => {
     setExpandedSections(prev => ({
@@ -88,6 +88,12 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   const reportItems = [
     { href: "/admin/reports/analytics", label: "Analytics", icon: BarChart },
     { href: "/admin/reports/job-submissions", label: "Job Submissions", icon: FileText },
+  ];
+
+  const blogItems = [
+    { href: "/admin/blogs", label: "Blog Posts", icon: BookOpen },
+    { href: "/admin/blog-authors", label: "Blog Authors", icon: User },
+    { href: "/admin/blog-categories", label: "Blog Categories", icon: Tag },
   ];
 
   return (
@@ -161,6 +167,44 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                 );
               })}
               
+              {/* Blog Management Section with Dropdown */}
+              <div className="mt-4">
+                <button
+                  onClick={() => toggleSection('blog')}
+                  className="flex w-full items-center rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white"
+                >
+                  {expandedSections.blog ? (
+                    <ChevronDown className="mr-3 h-5 w-5" />
+                  ) : (
+                    <ChevronRight className="mr-3 h-5 w-5" />
+                  )}
+                  Blog Management
+                </button>
+                
+                {expandedSections.blog && (
+                  <div className="ml-6 mt-1 space-y-1">
+                    {blogItems.map((item) => {
+                      const isActive = pathname === item.href;
+                      return (
+                        <Link
+                          key={item.href}
+                          href={item.href}
+                          className={cn(
+                            "flex items-center rounded-md px-3 py-2 text-sm font-medium",
+                            isActive
+                              ? "bg-slate-100 text-slate-900 dark:bg-gray-700 dark:text-white"
+                              : "text-slate-600 hover:bg-slate-50 hover:text-slate-900 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white"
+                          )}
+                        >
+                          <item.icon className="mr-3 h-5 w-5" />
+                          {item.label}
+                        </Link>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
               {/* Reports Section with Dropdown */}
               <div className="mt-4">
                 <button

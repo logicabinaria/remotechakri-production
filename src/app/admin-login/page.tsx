@@ -1,22 +1,86 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { Auth } from "@supabase/auth-ui-react";
-import { ThemeSupa } from "@supabase/auth-ui-shared";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { PasswordInput } from "@/components/ui/password-input";
+import { useForm } from "react-hook-form";
 import { Session } from "@supabase/supabase-js";
 import { useSupabase } from "@/components/providers/supabase-provider";
 import { useTheme } from "@/components/providers/theme-provider";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, AlertCircle } from "lucide-react";
+
+interface LoginFormData {
+  email: string;
+  password: string;
+}
 
 export default function AdminLoginPage() {
   const router = useRouter();
   const supabase = useSupabase();
-  const { theme } = useTheme();
+  useTheme(); // Keep the hook for theme functionality
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  
+  const { register, handleSubmit, formState: { errors } } = useForm<LoginFormData>();
+
+  const onSubmit = async (data: LoginFormData) => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      // Sign in with email and password
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: data.email,
+        password: data.password,
+      });
+      
+      if (signInError) {
+        throw signInError;
+      }
+      
+      // Get authenticated user data
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      
+      if (userError || !user) {
+        throw new Error('Error getting authenticated user');
+      }
+      
+      // Use RPC function to check admin status
+      const { data: isAdmin, error: rpcError } = await supabase.rpc('is_admin', {
+        user_id: user.id
+      });
+      
+      if (rpcError) {
+        throw rpcError;
+      }
+      
+      if (isAdmin) {
+        // User is an admin, redirect to admin dashboard
+        router.push('/admin');
+      } else {
+        // User is not an admin, show error
+        setError('You do not have admin privileges');
+        await supabase.auth.signOut();
+      }
+    } catch (error: unknown) {
+      console.error('Login error:', error);
+      setError(
+        error instanceof Error 
+          ? error.message 
+          : 'Failed to login. Please check your credentials.'
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // Check if user is already logged in and is an admin
   useEffect(() => {
@@ -56,7 +120,8 @@ export default function AdminLoginPage() {
 
   // Set up auth state change listener with admin-only redirection
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+    try {
+      const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event: 'SIGNED_IN' | 'SIGNED_OUT' | 'USER_UPDATED' | 'USER_DELETED' | 'PASSWORD_RECOVERY', 
        session: Session | null) => {
         if (event === 'SIGNED_IN' && session) {
@@ -96,6 +161,9 @@ export default function AdminLoginPage() {
     return () => {
       subscription.unsubscribe();
     };
+    } catch (error) {
+      console.error('Error setting up auth state change listener:', error);
+    }
   }, [router, supabase]);
 
   return (
@@ -135,40 +203,51 @@ export default function AdminLoginPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {/* Custom style to fix button visibility */}
-            <style jsx global>{`
-              .supabase-auth-ui_ui-button {  
-                background-color: #f48e41 !important;
-                color: white !important;
-                opacity: 1 !important;
-                visibility: visible !important;
-              }
-              .supabase-auth-ui_ui-button:hover {
-                background-color: #e07d30 !important;
-              }
-            `}</style>
+            {error && (
+              <Alert variant="destructive" className="mb-4">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
             
-            <Auth
-              supabaseClient={supabase}
-              appearance={{ 
-                theme: ThemeSupa,
-                variables: {
-                  default: {
-                    colors: {
-                      brand: 'rgb(var(--color-primary))',
-                      brandAccent: 'rgb(var(--color-primary-dark))',
-                    },
-                  },
-                },
-              }}
-              theme={theme === 'dark' ? 'dark' : 'light'}
-              providers={[]}
-              redirectTo={typeof window !== 'undefined' ? `${window.location.origin}/auth/callback` : '/auth/callback'}
-              onlyThirdPartyProviders={false}
-              magicLink={false}
-              view="sign_in"
-              showLinks={false}
-            />
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="admin@example.com"
+                  {...register("email", { 
+                    required: "Email is required",
+                    pattern: {
+                      value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                      message: "Invalid email address"
+                    }
+                  })}
+                  className={errors.email ? "border-red-500" : ""}
+                />
+                {errors.email && (
+                  <p className="text-sm text-red-500">{errors.email.message}</p>
+                )}
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="password">Password</Label>
+                <PasswordInput
+                  id="password"
+                  placeholder="••••••••"
+                  {...register("password", { required: "Password is required" })}
+                  className={errors.password ? "border-red-500" : ""}
+                />
+                {errors.password && (
+                  <p className="text-sm text-red-500">{errors.password.message}</p>
+                )}
+              </div>
+              
+              <Button type="submit" className="w-full bg-primary hover:bg-primary-dark" disabled={isLoading}>
+                {isLoading ? "Logging in..." : "Login"}
+              </Button>
+            </form>
             
             <div className="mt-4 text-center">
               <Link 

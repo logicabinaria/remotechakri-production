@@ -3,8 +3,10 @@
 import { useState } from "react";
 import Image from "next/image";
 import { Button } from "./button";
+import { Input } from "./input";
 import { uploadToCloudinary, CloudinaryUploadOptions } from "@/lib/cloudinary";
-import { Loader2, Upload, X } from "lucide-react";
+import { Loader2, X, Link, ImagePlus } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "./tabs";
 
 interface ImageUploadProps {
   value: string;
@@ -151,6 +153,16 @@ export function ImageUpload({
     onChange("");
   };
 
+  const [directUrl, setDirectUrl] = useState("");
+  const [activeTab, setActiveTab] = useState<"upload" | "url">("upload");
+
+  const handleUrlSubmit = () => {
+    if (directUrl) {
+      onChange(directUrl);
+      setDirectUrl("");
+    }
+  };
+
   return (
     <div className={`space-y-2 ${className}`}>
       {value ? (
@@ -174,27 +186,62 @@ export function ImageUpload({
           </Button>
         </div>
       ) : (
-        <div className="border border-dashed rounded-md p-6 flex flex-col items-center justify-center">
-          <Upload className="h-10 w-10 text-gray-400 mb-2" />
-          <p className="text-sm text-gray-500 mb-2">{label}</p>
-          <div className="flex items-center gap-2">
-            <Button
-              type="button"
-              variant="secondary"
-              disabled={isUploading}
-              onClick={() => document.getElementById("file-upload")?.click()}
-            >
-              {isUploading ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Uploading...
-                </>
-              ) : (
-                "Select File"
-              )}
-            </Button>
-          </div>
-          {error && <p className="text-sm text-red-500 mt-2">{error}</p>}
+        <div className="border border-dashed rounded-md p-6">
+          <Tabs 
+            defaultValue="upload" 
+            value={activeTab} 
+            onValueChange={(value) => setActiveTab(value as "upload" | "url")}
+            className="w-full"
+          >
+            <TabsList className="grid w-full grid-cols-2 mb-4">
+              <TabsTrigger value="upload">Upload Image</TabsTrigger>
+              <TabsTrigger value="url">Direct URL</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="upload" className="flex flex-col items-center justify-center">
+              <ImagePlus className="h-10 w-10 text-gray-400 mb-2" />
+              <p className="text-sm text-gray-500 mb-2">{label}</p>
+              <div className="flex items-center gap-2">
+                <Button
+                  type="button"
+                  variant="secondary"
+                  disabled={isUploading}
+                  onClick={() => document.getElementById("file-upload")?.click()}
+                >
+                  {isUploading ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Uploading...
+                    </>
+                  ) : (
+                    "Select File"
+                  )}
+                </Button>
+              </div>
+              {error && <p className="text-sm text-red-500 mt-2">{error}</p>}
+            </TabsContent>
+            
+            <TabsContent value="url" className="space-y-4">
+              <div className="flex flex-col space-y-2">
+                <p className="text-sm text-gray-500 mb-2">Enter image URL</p>
+                <div className="flex gap-2">
+                  <Input 
+                    placeholder="https://example.com/image.jpg" 
+                    value={directUrl}
+                    onChange={(e) => setDirectUrl(e.target.value)}
+                  />
+                  <Button 
+                    type="button" 
+                    onClick={handleUrlSubmit}
+                    disabled={!directUrl}
+                  >
+                    <Link className="h-4 w-4 mr-2" />
+                    Add
+                  </Button>
+                </div>
+              </div>
+            </TabsContent>
+          </Tabs>
         </div>
       )}
       <input

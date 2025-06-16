@@ -10,6 +10,7 @@ import { PublicLayout } from "@/components/public/layout/public-layout";
 import { getFeaturedJobs } from "@/lib/public/job-queries";
 import { getRecentJobs } from "@/lib/public/recent-job-queries";
 import { getAllCategories, getAllLocations, getPopularTags } from "@/lib/public/taxonomy-queries";
+import { getLatestBlogPosts } from "@/lib/public/blog-server-queries";
 import { generateMetadata } from "@/components/public/seo/metadata";
 import {
   HeroSection,
@@ -51,6 +52,9 @@ export default async function Home() {
   // Fetch popular tags
   const popularTags = await getPopularTags(12);
   
+  // Fetch latest blog posts
+  const latestBlogPosts = await getLatestBlogPosts(3);
+  
   return (
     <PublicLayout>
       {/* Hero Section */}
@@ -79,7 +83,7 @@ export default async function Home() {
             <h2 className="text-3xl font-bold tracking-tight">Latest Articles</h2>
             <p className="text-muted-foreground mt-2">Stay updated with the latest remote work trends and tips</p>
           </div>
-          <BlogSection />
+          <BlogSection posts={latestBlogPosts} />
         </section>
         
         {/* Browse By Location Section */}

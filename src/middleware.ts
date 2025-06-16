@@ -121,19 +121,33 @@ export async function middleware(request: NextRequest) {
       const enableWhatsAppVerification = process.env.NEXT_PUBLIC_ENABLE_WHATSAPP_VERIFICATION === 'true';
       
       if (enableWhatsAppVerification) {
-        const { data: profile, error: profileError } = await supabase
-          .from('user_profiles')
-          .select('is_whatsapp_verified')
-          .eq('user_id', user?.id || session.user.id)
+        // First check if user is an admin
+        const userId = user?.id || session.user.id;
+        const { data: adminData } = await supabase
+          .from('admins')
+          .select('user_id')
+          .eq('user_id', userId)
           .single();
         
-        if (profileError) {
-          console.error('Error checking verification status:', profileError);
-        } else if (!profile || !profile.is_whatsapp_verified) {
-          console.log('User not verified, redirecting to verification page');
-          // Only redirect if not already on the verify page
-          if (!currentPath.includes('/dashboard/verify')) {
-            return NextResponse.redirect(new URL('/dashboard/verify', request.url));
+        // Skip verification check for admin users
+        if (adminData) {
+          console.log('Admin user detected, skipping WhatsApp verification');
+        } else {
+          // Regular user - check verification status
+          const { data: profile, error: profileError } = await supabase
+            .from('user_profiles')
+            .select('is_whatsapp_verified')
+            .eq('user_id', userId)
+            .single();
+          
+          if (profileError) {
+            console.error('Error checking verification status:', profileError);
+          } else if (!profile || !profile.is_whatsapp_verified) {
+            console.log('User not verified, redirecting to verification page');
+            // Only redirect if not already on the verify page
+            if (!currentPath.includes('/dashboard/verify')) {
+              return NextResponse.redirect(new URL('/dashboard/verify', request.url));
+            }
           }
         }
       } else {

@@ -106,20 +106,12 @@ export function PublicFooter() {
                 </Link>
               </li>
               <li>
-                <a 
-                  href="#" 
+                <Link 
+                  href="/blog" 
                   className="text-sm text-gray-600 hover:text-primary dark:text-gray-400 dark:hover:text-primary transition-colors"
                 >
-                  Remote Work Guide
-                </a>
-              </li>
-              <li>
-                <a 
-                  href="#" 
-                  className="text-sm text-gray-600 hover:text-primary dark:text-gray-400 dark:hover:text-primary transition-colors"
-                >
-                  FAQ
-                </a>
+                  Blog
+                </Link>
               </li>
             </ul>
           </div>
@@ -131,28 +123,20 @@ export function PublicFooter() {
             </h3>
             <ul className="space-y-2">
               <li>
-                <a 
-                  href="#" 
+                <Link 
+                  href="/privacy-policy" 
                   className="text-sm text-gray-600 hover:text-primary dark:text-gray-400 dark:hover:text-primary transition-colors"
                 >
                   Privacy Policy
-                </a>
+                </Link>
               </li>
               <li>
-                <a 
-                  href="#" 
+                <Link 
+                  href="/terms-and-conditions" 
                   className="text-sm text-gray-600 hover:text-primary dark:text-gray-400 dark:hover:text-primary transition-colors"
                 >
-                  Terms of Service
-                </a>
-              </li>
-              <li>
-                <a 
-                  href="#" 
-                  className="text-sm text-gray-600 hover:text-primary dark:text-gray-400 dark:hover:text-primary transition-colors"
-                >
-                  Cookie Policy
-                </a>
+                  Terms and Conditions
+                </Link>
               </li>
             </ul>
           </div>
