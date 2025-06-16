@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { Github, Linkedin, Twitter } from "lucide-react";
+import Image from "next/image";
+// import { Github, Linkedin, Twitter } from "lucide-react";
 
 export function PublicFooter() {
   const currentYear = new Date().getFullYear();
@@ -12,14 +13,27 @@ export function PublicFooter() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* About */}
           <div>
-            <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">
-              RemoteChakri.com
-            </h3>
+            <div className="mb-4">
+              <Image 
+                src={process.env.NEXT_PUBLIC_LOGO_DARK_URL || ''}
+                alt="RemoteChakri.com"
+                width={180}
+                height={40}
+                className="hidden dark:block"
+              />
+              <Image 
+                src={process.env.NEXT_PUBLIC_LOGO_LIGHT_URL || ''}
+                alt="RemoteChakri.com"
+                width={180}
+                height={40}
+                className="block dark:hidden"
+              />
+            </div>
             <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
               The premier platform for finding remote job opportunities worldwide. 
               Connect with top companies hiring remote talent.
             </p>
-            <div className="flex space-x-4">
+            {/* <div className="flex space-x-4">
               <a 
                 href="https://twitter.com" 
                 target="_blank" 
@@ -47,7 +61,7 @@ export function PublicFooter() {
               >
                 <Github className="h-5 w-5" />
               </a>
-            </div>
+            </div> */}
           </div>
 
           {/* Quick Links */}

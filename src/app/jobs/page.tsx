@@ -70,9 +70,12 @@ export default async function JobsPage({ searchParams }: { searchParams: SearchP
   // Calculate pagination values
   const totalPages = Math.ceil(total / 12);
   
+  // Create a unique key based on all filter parameters to force re-render when filters change
+  const filterKey = `${categorySlug || ''}-${locationSlug || ''}-${jobTypeSlug || ''}-${searchQuery || ''}-${datePosted || ''}-${page}`;
+  
   return (
     <JobFilterProvider>
-      <PublicLayout>
+      <PublicLayout key={filterKey}>
         {/* Page header */}
         <section className="bg-gradient-to-b from-white to-gray-100 dark:from-gray-800 dark:to-gray-900 py-12">
           <div className="container mx-auto px-4">
