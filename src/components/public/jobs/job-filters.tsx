@@ -28,13 +28,11 @@ export function JobFilters({ categories, locations, jobTypes, tags = [] }: JobFi
   const { 
     filterState, 
     dispatch, 
-    applyFilters,
     resetFilters
   } = useJobFilters();
 
   const handleSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    applyFilters();
   };
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -46,7 +44,6 @@ export function JobFilters({ categories, locations, jobTypes, tags = [] }: JobFi
       type: 'SET_CATEGORY', 
       payload: filterState.category === slug ? null : slug 
     });
-    // Don't apply filters immediately, wait for Apply button
   };
 
   const handleLocationClick = (slug: string) => {
@@ -54,7 +51,6 @@ export function JobFilters({ categories, locations, jobTypes, tags = [] }: JobFi
       type: 'SET_LOCATION', 
       payload: filterState.location === slug ? null : slug 
     });
-    // Don't apply filters immediately, wait for Apply button
   };
 
   const handleJobTypeClick = (slug: string) => {
@@ -62,7 +58,6 @@ export function JobFilters({ categories, locations, jobTypes, tags = [] }: JobFi
       type: 'SET_JOB_TYPE', 
       payload: filterState.jobType === slug ? null : slug 
     });
-    // Don't apply filters immediately, wait for Apply button
   };
 
   const handleDatePostedClick = (value: string) => {
@@ -70,23 +65,15 @@ export function JobFilters({ categories, locations, jobTypes, tags = [] }: JobFi
       type: 'SET_DATE_POSTED', 
       payload: filterState.datePosted === value ? null : value 
     });
-    // Don't apply filters immediately, wait for Apply button
-  };
-
-  // No unused variables
-
-  const handleApplyFilters = () => {
-    applyFilters();
   };
 
   const handleResetFilters = () => {
-    // Call the resetFilters function from context
     resetFilters();
   };
 
   return (
     <div className="space-y-6 relative">
-      <div className="sticky top-0 bg-background z-10 space-y-4 pb-4">
+      <div className="top-0 bg-transparent backdrop-blur-sm border-b border-border/50 z-10 space-y-4 pb-4">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold">Filters</h2>
           <SortOptions />
@@ -103,20 +90,14 @@ export function JobFilters({ categories, locations, jobTypes, tags = [] }: JobFi
           />
         </form>
         
-        {/* Apply and Reset Buttons - Now at the top */}
-        <div className="flex gap-2 py-2">
+        {/* Reset Button */}
+        <div className="py-2">
           <Button 
             variant="outline" 
-            className="flex-1 text-sm h-9" 
+            className="w-full text-sm h-9" 
             onClick={handleResetFilters}
           >
-            Reset
-          </Button>
-          <Button 
-            className="flex-1 text-sm h-9" 
-            onClick={handleApplyFilters}
-          >
-            Apply Filters
+            Reset All Filters
           </Button>
         </div>
         

@@ -233,10 +233,15 @@ export default function LoginPage() {
   }, [router, supabase]);
 
   return (
-    <div 
-      className="flex items-center justify-center min-h-screen bg-cover bg-center" 
-      style={{ backgroundImage: `url(${process.env.NEXT_PUBLIC_LOGIN_BG_URL})` }}
-    >
+    <div className="relative flex items-center justify-center min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30 dark:from-gray-950 dark:via-gray-900 dark:to-blue-950/30 overflow-hidden">
+      {/* Modern Background Elements */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -top-32 -right-32 w-96 h-96 bg-gradient-to-br from-blue-400/10 to-purple-500/10 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute top-1/2 -left-32 w-80 h-80 bg-gradient-to-tr from-emerald-400/10 to-blue-500/10 rounded-full blur-3xl animate-pulse" style={{animationDelay: '2s'}} />
+        <div className="absolute bottom-0 right-1/4 w-64 h-64 bg-gradient-to-t from-purple-400/5 to-pink-500/5 rounded-full blur-2xl" />
+        {/* Grid Pattern */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:14px_24px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]" />
+      </div>
       <div className="absolute top-4 right-4">
         <ThemeToggle />
       </div>

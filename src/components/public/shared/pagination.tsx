@@ -22,7 +22,7 @@ export function Pagination({
   // Don't render pagination if there's only one page
   if (totalPages <= 1) return null;
 
-  // Function to build URL with query parameters
+  // Function to build URL with query parameters (for non-job-filter pages)
   const buildUrl = (page: number) => {
     const params = new URLSearchParams();
     

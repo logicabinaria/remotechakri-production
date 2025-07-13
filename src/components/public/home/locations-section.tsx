@@ -2,6 +2,8 @@ import Link from "next/link";
 import { MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Heading } from "@/components/ui/heading";
 import { Location } from "@/lib/supabase";
 
 interface LocationsSectionProps {
@@ -12,37 +14,42 @@ export function LocationsSection({ locations }: LocationsSectionProps) {
   // Filter out locations with no jobs
   const activeLocations = locations.filter(location => location.job_count > 0);
   return (
-    <section className="py-16 bg-white dark:bg-gray-800">
-      <div className="w-full max-w-[1600px] mx-auto px-4 md:px-6">
-        <div className="text-center mb-12">
-          <h2 className="text-2xl md:text-3xl font-bold mb-4 dark:text-white">
-            Browse Jobs by Location
-          </h2>
-          <p className="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-            Find remote jobs available in specific regions or worldwide
-          </p>
-        </div>
+    <div className="container mx-auto px-4">
+      <div className="text-center mb-12">
+        <Heading 
+          title="Popular Remote Job Locations"
+          description="Discover remote opportunities from companies around the world and explore global career possibilities."
+          size="lg"
+          align="center"
+        />
+      </div>
         
         {activeLocations.length > 0 ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
             {activeLocations.map((location) => (
-            <Link 
-              key={location.id} 
-              href={`/locations/${location.slug}`}
-              className="group"
-            >
-              <Card className="h-full transition-all hover:border-primary hover:shadow-md">
-                <CardContent className="p-6 flex flex-col items-center text-center">
-                  <MapPin className="h-8 w-8 text-primary mb-3" />
-                  <h3 className="font-medium mb-1 group-hover:text-primary transition-colors">
-                    {location.name}
-                  </h3>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
-                    {location.job_count} {location.job_count === 1 ? 'job' : 'jobs'}
-                  </p>
-                </CardContent>
-              </Card>
-            </Link>
+              <Link
+                key={location.id}
+                href={`/jobs?location=${location.slug}`}
+                className="group"
+              >
+                <Card className="h-full relative overflow-hidden group-hover:shadow-xl transition-all duration-300">
+                  <CardContent className="p-6 text-center relative z-10">
+                    <div className="mb-4 flex justify-center">
+                      <div className="p-3 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 group-hover:bg-blue-200 dark:group-hover:bg-blue-800/50 transition-colors duration-300">
+                        <MapPin className="h-6 w-6" />
+                      </div>
+                    </div>
+                    <h3 className="font-semibold text-gray-900 dark:text-white mb-3 group-hover:text-primary transition-colors duration-300">
+                      {location.name}
+                    </h3>
+                    <Badge variant="outline" className="text-xs">
+                      {location.job_count} {location.job_count === 1 ? 'job' : 'jobs'}
+                    </Badge>
+                  </CardContent>
+                  {/* Hover gradient overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                </Card>
+              </Link>
             ))}
           </div>
         ) : (
@@ -62,7 +69,6 @@ export function LocationsSection({ locations }: LocationsSectionProps) {
             </Link>
           </div>
         )}
-      </div>
-    </section>
+    </div>
   );
 }

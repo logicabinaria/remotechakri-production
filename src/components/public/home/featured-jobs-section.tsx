@@ -1,8 +1,11 @@
 import Link from "next/link";
-import { ArrowRight, Star } from "lucide-react";
+import { ArrowRight, Star, Briefcase } from "lucide-react";
 import { JobCompactCard } from "@/components/public/jobs/job-compact-card";
 import { JobWithRelations } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
+import { SectionContainer } from "@/components/ui/section-container";
+import { Heading } from "@/components/ui/heading";
+import { Badge } from "@/components/ui/badge";
 
 interface FeaturedJobsSectionProps {
   featuredJobs: JobWithRelations[];
@@ -10,52 +13,71 @@ interface FeaturedJobsSectionProps {
 
 export function FeaturedJobsSection({ featuredJobs }: FeaturedJobsSectionProps) {
   return (
-    <section className="py-20 bg-white dark:bg-gray-800 relative overflow-hidden">
-      {/* Decorative background elements */}
-      <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl" />
-      
-      <div className="w-full max-w-[1600px] mx-auto px-4 md:px-6 relative z-10">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10">
-          <div>
-            <div className="flex items-center mb-2">
-              <Star className="h-5 w-5 text-yellow-500 mr-2 fill-yellow-500" />
-              <span className="text-sm font-medium text-primary">Handpicked Opportunities</span>
-            </div>
-            <h2 className="text-2xl md:text-3xl font-bold dark:text-white">
-              Featured Remote Jobs
-            </h2>
+    <SectionContainer variant="gradient" background="white" size="xl" className="relative overflow-hidden">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-12 gap-6">
+        <div>
+          <div className="flex items-center mb-4">
+            <Badge variant="gradient" className="mr-3">
+              <Star className="h-4 w-4 mr-2 fill-current" />
+              Handpicked Opportunities
+            </Badge>
           </div>
-          
-          <Link href="/jobs" className="mt-4 md:mt-0">
-            <Button variant="outline" className="group">
-              View all jobs
-              <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-            </Button>
-          </Link>
+          <Heading 
+            title="⭐ Featured Remote Jobs"
+            description="Carefully curated opportunities from top companies looking for exceptional talent. These positions offer the best remote work experiences."
+            size="xl"
+            align="left"
+            gradient
+          />
         </div>
         
+        <Link href="/jobs" className="mt-4 md:mt-0">
+          <Button 
+            variant="glass" 
+            size="lg"
+            className="group px-8 py-4 font-semibold transition-all duration-300 hover:scale-105"
+          >
+            <Briefcase className="mr-3 h-5 w-5 group-hover:rotate-12 transition-transform duration-300" />
+            View All Jobs
+            <ArrowRight className="ml-3 h-5 w-5 group-hover:translate-x-1 transition-transform duration-300" />
+          </Button>
+        </Link>
+      </div>
+        
         {featuredJobs.length > 0 ? (
-          <div className="grid grid-cols-1 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {featuredJobs.map((job) => (
-              <div key={job.id} className="relative transition-all duration-300 hover:shadow-md rounded-lg group">
-                <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/20 to-primary/10 rounded-lg blur opacity-0 group-hover:opacity-100 transition duration-300" />
-                <div className="relative bg-white dark:bg-gray-800 rounded-lg overflow-hidden">
-                  <JobCompactCard job={job} featured={true} />
-                </div>
+              <div key={job.id}>
+                <JobCompactCard job={job} featured={true} />
               </div>
             ))}
           </div>
         ) : (
-          <div className="text-center py-16 bg-gray-50 dark:bg-gray-700/20 rounded-lg border border-gray-100 dark:border-gray-700">
-            <p className="text-gray-600 dark:text-gray-400 mb-4">
-              No featured jobs available at the moment. Check back soon!
-            </p>
+          <div className="text-center py-16 bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
+            <div className="mb-6">
+              <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Star className="h-8 w-8 text-primary" />
+              </div>
+            </div>
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">
+              🔍 No Featured Jobs Yet
+            </h3>
+            <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-md mx-auto">
+               We&apos;re carefully curating the best remote opportunities for you. Check back soon for amazing featured positions!
+             </p>
             <Link href="/jobs">
-              <Button variant="outline" size="sm">Browse all jobs</Button>
+              <Button 
+                variant="gradient" 
+                size="lg"
+                className="group"
+              >
+                <Briefcase className="mr-2 h-5 w-5" />
+                Browse All Jobs
+                <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform duration-200" />
+              </Button>
             </Link>
           </div>
         )}
-      </div>
-    </section>
+    </SectionContainer>
   );
 }

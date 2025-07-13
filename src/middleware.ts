@@ -121,16 +121,14 @@ export async function middleware(request: NextRequest) {
       const enableWhatsAppVerification = process.env.NEXT_PUBLIC_ENABLE_WHATSAPP_VERIFICATION === 'true';
       
       if (enableWhatsAppVerification) {
-        // First check if user is an admin
+        // First check if user is an admin using RPC function to avoid 406 errors
         const userId = user?.id || session.user.id;
-        const { data: adminData } = await supabase
-          .from('admins')
-          .select('user_id')
-          .eq('user_id', userId)
-          .single();
+        const { data: isAdmin, error: adminCheckError } = await supabase.rpc('is_admin', {
+          user_id: userId
+        });
         
         // Skip verification check for admin users
-        if (adminData) {
+        if (!adminCheckError && isAdmin) {
           console.log('Admin user detected, skipping WhatsApp verification');
         } else {
           // Regular user - check verification status

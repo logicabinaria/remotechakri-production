@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Heading } from "@/components/ui/heading";
 import { JobCompactCard } from "@/components/public/jobs/job-compact-card";
 import type { JobWithRelations } from "@/lib/supabase";
 
@@ -54,20 +55,25 @@ export function RecentJobsSection({ initialJobs, totalJobs }: RecentJobsSectionP
   };
 
   return (
-    <section className="py-16 bg-white dark:bg-gray-800">
-      <div className="w-full max-w-[1600px] mx-auto px-4 md:px-6">
-        <div className="flex justify-between items-center mb-8">
-          <h2 className="text-2xl md:text-3xl font-bold dark:text-white">
-            Recent Job Opportunities
-          </h2>
-          <Link href="/jobs" className="text-primary hover:underline font-medium">
-            View all jobs
-          </Link>
-        </div>
+    <div className="container mx-auto px-4">
+      <div className="text-center mb-12">
+        <Heading 
+          title="Recent Job Opportunities"
+          description="Discover the latest remote job postings from top companies worldwide and find your next career opportunity."
+          size="lg"
+          align="center"
+          gradient={true}
+        />
+      </div>
+      <div className="flex justify-end mb-8">
+        <Link href="/jobs" className="text-primary hover:underline font-medium">
+          View all jobs
+        </Link>
+      </div>
         
         {jobs.length > 0 ? (
           <>
-            <div className="grid grid-cols-1 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {jobs.map((job) => (
                 <JobCompactCard key={job.id} job={job} />
               ))}
@@ -78,16 +84,22 @@ export function RecentJobsSection({ initialJobs, totalJobs }: RecentJobsSectionP
                 <Button 
                   onClick={loadMoreJobs} 
                   disabled={loading}
-                  variant="outline"
+                  variant="glass"
                   size="lg"
+                  className="min-w-[200px] group"
                 >
                   {loading ? (
                     <>
-                      <Spinner className="mr-2 h-4 w-4" />
+                      <Spinner className="mr-2" />
                       Loading...
                     </>
                   ) : (
-                    'Load More Jobs'
+                    <>
+                      Load More Jobs
+                      <svg className="ml-2 h-4 w-4 transition-transform group-hover:translate-y-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                      </svg>
+                    </>
                   )}
                 </Button>
               </div>
@@ -102,7 +114,6 @@ export function RecentJobsSection({ initialJobs, totalJobs }: RecentJobsSectionP
             </CardContent>
           </Card>
         )}
-      </div>
-    </section>
+    </div>
   );
 }

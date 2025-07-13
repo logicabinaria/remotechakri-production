@@ -172,6 +172,31 @@ export async function getLatestJobs(options: GetLatestJobsOptions = {}): Promise
     countQuery = countQuery.or(`title.ilike.${searchTerm},description.ilike.${searchTerm}`);
   }
   
+  // Apply date posted filter to count query as well
+  if (datePosted) {
+    const now = new Date();
+    let dateFilter: Date;
+    
+    switch(datePosted) {
+      case '24h':
+        dateFilter = new Date(now.setHours(now.getHours() - 24));
+        break;
+      case '3d':
+        dateFilter = new Date(now.setDate(now.getDate() - 3));
+        break;
+      case '7d':
+        dateFilter = new Date(now.setDate(now.getDate() - 7));
+        break;
+      case '30d':
+        dateFilter = new Date(now.setMonth(now.getMonth() - 1));
+        break;
+      default:
+        dateFilter = new Date(0); // Default to epoch if invalid value
+    }
+    
+    countQuery = countQuery.gte('posted_at', dateFilter.toISOString());
+  }
+  
   const { count, error: countError } = await countQuery;
 
   if (countError) {
@@ -220,32 +245,17 @@ export async function getLatestJobs(options: GetLatestJobsOptions = {}): Promise
     query = query.gte('posted_at', dateFilter.toISOString());
   }
   
-  // No experience level filter as it's not in the database schema
-  
-  if (locationSlug) {
-    // First get the location ID from the slug
-    const { data: locationData } = await supabase
-      .from('locations')
-      .select('id')
-      .eq('slug', locationSlug)
-      .single();
-      
-    if (locationData?.id) {
-      query = query.eq('location_id', locationData.id);
-    }
+  // Apply category filter if provided
+  if (categoryId) {
+    query = query.eq('category_id', categoryId);
   }
   
-  if (jobTypeSlug) {
-    // First get the job type ID from the slug
-    const { data: jobTypeData } = await supabase
-      .from('job_types')
-      .select('id')
-      .eq('slug', jobTypeSlug)
-      .single();
-      
-    if (jobTypeData?.id) {
-      query = query.eq('job_type_id', jobTypeData.id);
-    }
+  if (locationId) {
+    query = query.eq('location_id', locationId);
+  }
+  
+  if (jobTypeId) {
+    query = query.eq('job_type_id', jobTypeId);
   }
   
   if (searchQuery) {
@@ -254,32 +264,8 @@ export async function getLatestJobs(options: GetLatestJobsOptions = {}): Promise
   }
   
   // Apply tag filter if provided (single tag)
-  if (tagSlug) {
-    // First get the tag ID from the slug
-    const { data: tagData } = await supabase
-      .from('tags')
-      .select('id')
-      .eq('slug', tagSlug)
-      .single();
-      
-    if (tagData?.id) {
-      // Get job IDs that have this tag
-      const { data: jobTagsData } = await supabase
-        .from('job_tags')
-        .select('job_id')
-        .eq('tag_id', tagData.id);
-        
-      if (jobTagsData && jobTagsData.length > 0) {
-        const jobIds = jobTagsData.map(jt => jt.job_id);
-        query = query.in('id', jobIds);
-      } else {
-        // If no jobs have this tag, return empty result
-        return { jobs: [], total: 0 };
-      }
-    } else {
-      // If tag not found, return empty result
-      return { jobs: [], total: 0 };
-    }
+  if (jobIdsWithTag) {
+    query = query.in('id', jobIdsWithTag);
   }
   
   // Apply multiple tags filter if provided
@@ -391,6 +377,7 @@ export async function getJobBySlug(slug: string): Promise<JobWithRelations | nul
     .eq('slug', slug)
     .eq('is_published', true)
     .is('deleted_at', null)
+    .or(`expires_at.is.null,expires_at.gt.${new Date().toISOString()}`)
     .single();
 
   if (error) {
@@ -482,6 +469,7 @@ export async function getSimilarJobs(
     `)
     .eq('is_published', true)
     .is('deleted_at', null)
+    .or(`expires_at.is.null,expires_at.gt.${new Date().toISOString()}`)
     .neq('id', jobId) // Exclude the current job
     .order('posted_at', { ascending: false })
     .limit(limit);

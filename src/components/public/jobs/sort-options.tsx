@@ -19,11 +19,11 @@ const sortOptions = [
 ];
 
 export function SortOptions() {
-  const { filterState, dispatch, applyFilters } = useJobFilters();
+  const { filterState, dispatch } = useJobFilters();
   
   const handleSortChange = (value: string) => {
     dispatch({ type: 'SET_SORT_BY', payload: value });
-    applyFilters();
+    // applyFilters will be called automatically by useEffect in provider
   };
   
   const currentSortLabel = sortOptions.find(

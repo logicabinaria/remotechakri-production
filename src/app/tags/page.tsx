@@ -18,8 +18,10 @@ export default async function TagsPage() {
   // Fetch all popular tags with job counts (get a large number to show a comprehensive list)
   const tags = await getPopularTags(100);
   
-  // Sort tags by job count (descending)
-  const sortedTags = [...tags].sort((a, b) => b.job_count - a.job_count);
+  // Filter out tags with zero job counts and sort by job count (descending)
+  const sortedTags = [...tags]
+    .filter(tag => tag.job_count > 0)
+    .sort((a, b) => b.job_count - a.job_count);
   
   return (
     <PublicLayout>
@@ -57,7 +59,7 @@ export default async function TagsPage() {
                     key={tag.id} 
                     href={`/tags/${tag.slug}`}
                   >
-                    <Badge variant="secondary" className="px-4 py-2 text-sm hover:bg-primary hover:text-white transition-colors">
+                    <Badge variant="outline" className="px-4 py-2 text-sm hover:bg-primary hover:text-white transition-colors">
                       {tag.name} ({tag.job_count})
                     </Badge>
                   </Link>

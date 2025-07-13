@@ -167,7 +167,16 @@ export function JobFilterProvider({ children }: { children: ReactNode }) {
       applyFilters();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [debouncedSearch, filterState.page]);
+  }, [
+    debouncedSearch, 
+    filterState.category, 
+    filterState.location, 
+    filterState.jobType, 
+    filterState.datePosted, 
+    filterState.tags, 
+    filterState.sortBy, 
+    filterState.page
+  ]);
 
   // Apply filters by updating URL
   const applyFilters = () => {
@@ -190,9 +199,9 @@ export function JobFilterProvider({ children }: { children: ReactNode }) {
       params.set('tags', filterState.tags.join(','));
     }
     
-    // Update URL
+    // Update URL - use replace to trigger server component re-execution
     const newUrl = `${pathname}${params.toString() ? `?${params.toString()}` : ''}`;
-    router.push(newUrl, { scroll: false });
+    router.replace(newUrl);
     
     // Set loading state with a small delay to allow for UI updates
     setTimeout(() => {
@@ -222,8 +231,7 @@ export function JobFilterProvider({ children }: { children: ReactNode }) {
     // Reset page when removing filters
     dispatch({ type: 'SET_PAGE', payload: 1 });
     
-    // Apply the updated filters
-    applyFilters();
+    // applyFilters will be called automatically by useEffect
   };
 
   // Reset all filters

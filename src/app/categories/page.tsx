@@ -17,8 +17,10 @@ export default async function CategoriesPage() {
   // Fetch all categories with job counts
   const categories = await getAllCategories();
   
-  // Sort categories by job count (descending)
-  const sortedCategories = [...categories].sort((a, b) => b.job_count - a.job_count);
+  // Filter out categories with zero job counts and sort by job count (descending)
+  const sortedCategories = [...categories]
+    .filter(category => category.job_count > 0)
+    .sort((a, b) => b.job_count - a.job_count);
   
   return (
     <PublicLayout>

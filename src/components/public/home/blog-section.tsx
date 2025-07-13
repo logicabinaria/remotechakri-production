@@ -1,8 +1,9 @@
 import Link from "next/link";
 import Image from "next/image";
-import { Calendar, ArrowRight, Clock } from "lucide-react";
+import { Calendar, ArrowRight, Clock, BookOpen } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { BlogPost, calculateReadingTime } from "@/lib/public/blog-queries";
 
 interface BlogSectionProps {
@@ -18,70 +19,89 @@ export function BlogSection({ posts }: BlogSectionProps) {
 
   return (
     <div className="w-full">
-      <div className="flex items-center justify-between mb-6">
-        <Link href="/blog" className="text-primary text-sm font-medium hover:underline flex items-center">
-          View all articles
-          <ArrowRight className="ml-1 h-4 w-4" />
-        </Link>
-      </div>
 
-      {/* Responsive grid layout */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {/* Enhanced responsive grid layout */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {posts.map((post) => (
-          <Card key={post.id} className="h-full flex flex-col overflow-hidden hover:shadow-md transition-shadow">
-            {/* Image container with fixed aspect ratio */}
-            <div className="relative w-full aspect-[16/9] overflow-hidden">
-              {post.cover_image_url ? (
-                <Image 
-                  src={post.cover_image_url} 
-                  alt={post.title}
-                  fill
-                  className="object-cover hover:scale-105 transition-transform duration-300"
-                />
-              ) : (
-                <div className="absolute inset-0 bg-gray-200 dark:bg-gray-800 flex items-center justify-center">
-                  <span className="text-gray-500 dark:text-gray-400 text-sm">No Image</span>
+          <div 
+            key={post.id} 
+            className="group"
+          >
+            <Card className="h-full flex flex-col overflow-hidden hover:shadow-md transition-shadow duration-200 border border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800">
+              {/* Simplified image container */}
+              <div className="relative w-full aspect-[16/9] overflow-hidden">
+                {post.cover_image_url ? (
+                  <Image 
+                    src={post.cover_image_url} 
+                    alt={post.title}
+                    fill
+                    className="object-cover"
+                  />
+                ) : (
+                  <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center">
+                    <div className="text-center">
+                      <BookOpen className="h-12 w-12 text-primary/60 mx-auto mb-2" />
+                      <span className="text-primary/60 font-medium text-sm">Article</span>
+                    </div>
+                  </div>
+                )}
+                {/* Reading time badge */}
+                <div className="absolute top-4 right-4">
+                  <Badge variant="glass" className="text-xs font-medium">
+                    <Clock className="h-3 w-3 mr-1" />
+                    {calculateReadingTime(post.content)}
+                  </Badge>
                 </div>
-              )}
-            </div>
-            
-            <CardContent className="flex-1 flex flex-col p-5">
-              <div className="flex items-center text-sm text-gray-500 dark:text-gray-400 mb-3">
-                <Calendar className="h-4 w-4 mr-1" />
-                <span>{formatDate(post.published_at)}</span>
-                <span className="mx-2">•</span>
-                <Clock className="h-4 w-4 mr-1" />
-                <span>{calculateReadingTime(post.content)}</span>
               </div>
               
-              <h3 className="font-bold text-lg mb-2 line-clamp-2">
-                {post.title}
-              </h3>
-              
-              <p className="text-gray-600 dark:text-gray-300 line-clamp-3 mb-4">
-                {post.excerpt}
-              </p>
-              
-              <div className="mt-auto">
-                <Button asChild variant="link" className="p-0 h-auto font-medium">
-                  <Link href={`/blog/${post.slug}`} className="flex items-center text-primary">
-                    Read more
-                    <ArrowRight className="ml-1 h-4 w-4" />
+              <CardContent className="flex-1 flex flex-col p-6">
+                {/* Enhanced metadata */}
+                <div className="flex items-center text-sm text-gray-500 dark:text-gray-400 mb-4">
+                  <Calendar className="h-4 w-4 mr-2" />
+                  <span className="font-medium">{formatDate(post.published_at)}</span>
+                </div>
+                
+                {/* Simplified title */}
+                <h3 className="font-bold text-xl mb-3 line-clamp-2 leading-tight">
+                  {post.title}
+                </h3>
+                
+                {/* Simplified excerpt */}
+                <p className="text-gray-600 dark:text-gray-300 line-clamp-3 mb-6 leading-relaxed">
+                  {post.excerpt}
+                </p>
+                
+                {/* Simplified CTA button */}
+                <div className="mt-auto">
+                  <Link href={`/blog/${post.slug}`} className="group/link">
+                    <Button 
+                      variant="ghost" 
+                      className="p-0 h-auto font-semibold text-primary hover:text-primary/80"
+                    >
+                      Read full article
+                      <ArrowRight className="ml-2 h-4 w-4 group-hover/link:translate-x-1 transition-transform duration-200" />
+                    </Button>
                   </Link>
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         ))}
       </div>
       
-      <div className="mt-8 text-center">
-        <Button asChild variant="outline">
-          <Link href="/blog">
-            Browse All Articles
-            <ArrowRight className="ml-2 h-4 w-4" />
-          </Link>
-        </Button>
+      {/* Simplified CTA section */}
+      <div className="mt-12 text-center">
+        <Link href="/blog">
+          <Button 
+            variant="gradient" 
+            size="lg" 
+            className="group px-8 py-4 text-lg font-semibold"
+          >
+            <BookOpen className="mr-3 h-5 w-5" />
+            Explore All Articles
+            <ArrowRight className="ml-3 h-5 w-5 group-hover:translate-x-1 transition-transform duration-200" />
+          </Button>
+        </Link>
       </div>
     </div>
   );

@@ -6,6 +6,96 @@
   .text-balance {
     text-wrap: balance;
   }
+  
+  /* Modern animations */
+  .animate-fade-in {
+    animation: fadeIn 0.6s ease-out;
+  }
+  
+  .animate-slide-up {
+    animation: slideUp 0.6s ease-out;
+  }
+  
+  .animate-scale-in {
+    animation: scaleIn 0.4s ease-out;
+  }
+  
+  /* Glass morphism effect */
+  .glass {
+    backdrop-filter: blur(16px) saturate(180%);
+    background-color: rgba(255, 255, 255, 0.75);
+    border: 1px solid rgba(255, 255, 255, 0.125);
+  }
+  
+  .glass-dark {
+    backdrop-filter: blur(16px) saturate(180%);
+    background-color: rgba(17, 25, 40, 0.75);
+    border: 1px solid rgba(255, 255, 255, 0.125);
+  }
+  
+  /* Enhanced shadows */
+  .shadow-soft {
+    box-shadow: 0 2px 15px -3px rgba(0, 0, 0, 0.07), 0 10px 20px -2px rgba(0, 0, 0, 0.04);
+  }
+  
+  .shadow-soft-dark {
+    box-shadow: 0 2px 15px -3px rgba(0, 0, 0, 0.3), 0 10px 20px -2px rgba(0, 0, 0, 0.2);
+  }
+  
+  .shadow-glow {
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.15);
+  }
+  
+  .shadow-glow-hover {
+    box-shadow: 0 0 30px rgba(59, 130, 246, 0.25);
+  }
+  
+  /* Grid pattern for decorative backgrounds */
+  .bg-grid-pattern {
+    background-image: 
+      linear-gradient(rgba(0, 0, 0, 0.1) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0, 0, 0, 0.1) 1px, transparent 1px);
+    background-size: 20px 20px;
+  }
+  
+  .dark .bg-grid-pattern {
+    background-image: 
+      linear-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 
@@ -14,74 +104,74 @@
   :root {
     /* Base colors */
     --background: 0 0% 100%;
-    --foreground: 213 45% 22%; /* Slightly softened version of brand color for text */
+    --foreground: 215 25% 27%; /* Modern dark blue-gray for text */
     --card: 0 0% 100%;
-    --card-foreground: 213 45% 22%;
+    --card-foreground: 215 25% 27%;
     --popover: 0 0% 100%;
-    --popover-foreground: 213 45% 22%;
+    --popover-foreground: 215 25% 27%;
     
-    /* Brand colors */
-    --primary: 29 89% 61%; /* Orange #f48e41 */
-    --primary-foreground: 0 0% 100%; /* White text on orange */
-    --secondary: 213 45% 22%; /* Navy blue #1d3557 */
-    --secondary-foreground: 0 0% 100%; /* White text on navy */
+    /* Brand colors - Blue/Purple theme */
+    --primary: 217 91% 60%; /* Modern blue #3b82f6 */
+    --primary-foreground: 0 0% 100%; /* White text on blue */
+    --secondary: 262 83% 58%; /* Purple #8b5cf6 */
+    --secondary-foreground: 0 0% 100%; /* White text on purple */
     
     /* Supporting colors */
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 213 25% 40%; /* Lighter navy for muted text */
-    --accent: 29 89% 96%; /* Very light orange for accent backgrounds */
-    --accent-foreground: 29 89% 30%; /* Darker orange for accent text */
+    --muted: 220 14% 96%;
+    --muted-foreground: 215 16% 47%; /* Muted blue-gray for text */
+    --accent: 217 91% 95%; /* Very light blue for accent backgrounds */
+    --accent-foreground: 217 91% 35%; /* Darker blue for accent text */
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
     
     /* Border and input colors */
-    --border: 213 25% 90%; /* Light navy for borders */
-    --input: 213 25% 90%;
-    --ring: 29 89% 61%; /* Orange for focus rings */
+    --border: 220 13% 91%; /* Light blue-gray for borders */
+    --input: 220 13% 91%;
+    --ring: 217 91% 60%; /* Blue for focus rings */
     
-    /* Chart colors */
-    --chart-1: 29 89% 61%; /* Orange */
-    --chart-2: 213 45% 22%; /* Navy */
-    --chart-3: 213 30% 40%; /* Lighter navy */
-    --chart-4: 29 70% 50%; /* Darker orange */
-    --chart-5: 213 20% 60%; /* Very light navy */
+    /* Chart colors - Blue/Purple palette */
+    --chart-1: 217 91% 60%; /* Blue */
+    --chart-2: 262 83% 58%; /* Purple */
+    --chart-3: 204 94% 94%; /* Light blue */
+    --chart-4: 262 83% 85%; /* Light purple */
+    --chart-5: 217 91% 85%; /* Very light blue */
     
     --radius: 0.5rem;
   }
   .dark {
     /* Base colors */
-    --background: 213 45% 10%; /* Dark navy background */
+    --background: 224 71% 4%; /* Dark blue-gray background */
     --foreground: 0 0% 95%; /* Light text */
-    --card: 213 45% 12%; /* Slightly lighter navy for cards */
+    --card: 224 71% 6%; /* Slightly lighter dark blue for cards */
     --card-foreground: 0 0% 95%;
-    --popover: 213 45% 12%;
+    --popover: 224 71% 6%;
     --popover-foreground: 0 0% 95%;
     
-    /* Brand colors */
-    --primary: 29 89% 61%; /* Keep orange as primary */
-    --primary-foreground: 0 0% 100%; /* White text on orange */
-    --secondary: 213 40% 30%; /* Lighter navy for secondary */
-    --secondary-foreground: 0 0% 100%;
+    /* Brand colors - Blue/Purple theme */
+    --primary: 217 91% 60%; /* Modern blue */
+    --primary-foreground: 0 0% 100%; /* White text on blue */
+    --secondary: 262 83% 58%; /* Purple */
+    --secondary-foreground: 0 0% 100%; /* White text on purple */
     
     /* Supporting colors */
-    --muted: 213 45% 18%; /* Darker navy for muted backgrounds */
-    --muted-foreground: 213 25% 65%; /* Light navy for muted text */
-    --accent: 29 50% 25%; /* Dark orange for accent backgrounds */
-    --accent-foreground: 29 89% 80%; /* Light orange for accent text */
+    --muted: 224 71% 10%; /* Darker blue-gray for muted backgrounds */
+    --muted-foreground: 215 20% 65%; /* Light blue-gray for muted text */
+    --accent: 217 91% 15%; /* Dark blue for accent backgrounds */
+    --accent-foreground: 217 91% 75%; /* Light blue for accent text */
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 95%;
     
     /* Border and input colors */
-    --border: 213 45% 25%; /* Visible navy borders */
-    --input: 213 45% 25%;
-    --ring: 29 89% 61%; /* Orange for focus rings */
+    --border: 224 71% 15%; /* Visible blue-gray borders */
+    --input: 224 71% 15%;
+    --ring: 217 91% 60%; /* Blue for focus rings */
     
-    /* Chart colors */
-    --chart-1: 29 89% 61%; /* Orange */
-    --chart-2: 213 45% 60%; /* Light navy */
-    --chart-3: 29 70% 40%; /* Dark orange */
-    --chart-4: 213 30% 80%; /* Very light navy */
-    --chart-5: 29 50% 80%; /* Light orange */
+    /* Chart colors - Blue/Purple palette */
+    --chart-1: 217 91% 60%; /* Blue */
+    --chart-2: 262 83% 58%; /* Purple */
+    --chart-3: 217 91% 75%; /* Light blue */
+    --chart-4: 262 83% 75%; /* Light purple */
+    --chart-5: 217 91% 85%; /* Very light blue */
   }
 }
 

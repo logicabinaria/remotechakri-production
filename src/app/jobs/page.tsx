@@ -13,7 +13,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { PublicLayout } from '@/components/public/layout/public-layout';
 import { JobCard } from '@/components/public/jobs/job-card';
-import { Pagination } from '@/components/public/shared/pagination';
+import { JobFilterPagination } from "@/components/public/shared/job-filter-pagination";
 import { getLatestJobs } from '@/lib/public/job-queries';
 import { getAllCategories, getAllJobTypes, getAllLocations } from '@/lib/public/taxonomy-queries';
 import { generateMetadata } from '@/components/public/seo/metadata';
@@ -37,6 +37,8 @@ interface SearchParams {
   search?: string;
   datePosted?: string;
   sortBy?: string;
+  tags?: string;
+  tag?: string;
 }
 
 // Jobs list page component
@@ -48,13 +50,22 @@ export default async function JobsPage({ searchParams }: { searchParams: SearchP
   const jobTypeSlug = searchParams.jobType;
   const searchQuery = searchParams.search;
   const datePosted = searchParams.datePosted;
+  const sortBy = searchParams.sortBy || 'newest';
+  // Handle both 'tag' (singular) and 'tags' (plural) parameters
+  const tagSlugs = searchParams.tags ? searchParams.tags.split(',') : 
+                   searchParams.tag ? [searchParams.tag] : [];
   
   // Fetch filter data
-  const [categories, locations, jobTypes] = await Promise.all([
+  const [allCategories, allLocations, allJobTypes] = await Promise.all([
     getAllCategories(),
     getAllLocations(),
     getAllJobTypes()
   ]);
+  
+  // Filter out items with zero job counts for the sidebar
+  const categories = allCategories.filter(category => category.job_count > 0);
+  const locations = allLocations.filter(location => location.job_count > 0);
+  const jobTypes = allJobTypes.filter(jobType => jobType.job_count > 0);
   
   // Fetch jobs with filters and pagination
   const { jobs, total } = await getLatestJobs({
@@ -64,14 +75,16 @@ export default async function JobsPage({ searchParams }: { searchParams: SearchP
     locationSlug,
     jobTypeSlug,
     searchQuery,
-    datePosted
+    datePosted,
+    sortBy,
+    tagSlugs
   });
   
   // Calculate pagination values
   const totalPages = Math.ceil(total / 12);
   
   // Create a unique key based on all filter parameters to force re-render when filters change
-  const filterKey = `${categorySlug || ''}-${locationSlug || ''}-${jobTypeSlug || ''}-${searchQuery || ''}-${datePosted || ''}-${page}`;
+  const filterKey = `${categorySlug || ''}-${locationSlug || ''}-${jobTypeSlug || ''}-${searchQuery || ''}-${datePosted || ''}-${sortBy || ''}-${tagSlugs.join(',') || ''}-${searchParams.tag || ''}-${page}`;
   
   return (
     <JobFilterProvider>
@@ -151,12 +164,10 @@ export default async function JobsPage({ searchParams }: { searchParams: SearchP
               {/* Pagination */}
               {totalPages > 1 && (
                 <div className="mt-8">
-                  <Pagination 
-                    currentPage={page} 
-                    totalPages={totalPages} 
-                    baseUrl="/jobs"
-                    preserveParams={true}
-                  />
+                  <JobFilterPagination
+          currentPage={page}
+          totalPages={totalPages}
+        />
                 </div>
               )}
             </main>
