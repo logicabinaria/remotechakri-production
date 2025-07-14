@@ -32,7 +32,7 @@ export function LocationsSection({ locations }: LocationsSectionProps) {
                 href={`/jobs?location=${location.slug}`}
                 className="group"
               >
-                <Card className="h-full relative overflow-hidden group-hover:shadow-xl transition-all duration-300">
+                <Card hoverable={true} className="h-full relative overflow-hidden group-hover:shadow-xl transition-all duration-300">
                   <CardContent className="p-6 text-center relative z-10">
                     <div className="mb-4 flex justify-center">
                       <div className="p-3 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 group-hover:bg-blue-200 dark:group-hover:bg-blue-800/50 transition-colors duration-300">

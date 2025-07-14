@@ -64,7 +64,7 @@ export function CategoriesSection({ categories }: CategoriesSectionProps) {
                 href={`/jobs?category=${category.slug}`}
                 className="group"
               >
-                <Card className="h-full relative overflow-hidden group-hover:shadow-xl transition-all duration-300">
+                <Card hoverable={true} className="h-full relative overflow-hidden group-hover:shadow-xl transition-all duration-300">
                   <CardContent className="p-6 text-center relative z-10">
                     <div className="mb-4 flex justify-center">
                       <div className="w-12 h-12 rounded-full bg-primary/10 group-hover:bg-primary/20 transition-colors duration-300 flex items-center justify-center">

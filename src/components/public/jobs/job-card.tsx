@@ -31,11 +31,14 @@ export function JobCard({ job, featured = false }: JobCardProps) {
         : "Salary not specified";
 
   return (
-    <Card className={`group overflow-hidden transition-all duration-300 hover:shadow-md dark:hover:shadow-lg ${
-      featured 
-        ? 'border-primary border-2 shadow-sm' 
-        : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
-    }`}>
+    <Card 
+      hoverable={true}
+      className={`group overflow-hidden transition-all duration-300 hover:shadow-md dark:hover:shadow-lg ${
+        featured 
+          ? 'border-primary border-2 shadow-sm' 
+          : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
+      }`}
+    >
       <CardContent className="p-6 relative">
         {/* Featured gradient overlay */}
         {featured && (

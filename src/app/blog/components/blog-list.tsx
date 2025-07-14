@@ -54,7 +54,7 @@ export default function BlogList({ initialPosts, currentPage, totalPages, catego
   return (
     <div className="space-y-8">
       {posts.map((post) => (
-        <Card key={post.id} className="overflow-hidden hover:shadow-md transition-shadow">
+        <Card key={post.id} className="overflow-hidden">
           <div className="md:flex">
             {/* Image container with consistent 16/9 aspect ratio */}
             <div className="relative w-full md:w-2/5 aspect-[16/9] overflow-hidden">

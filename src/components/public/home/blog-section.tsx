@@ -27,7 +27,7 @@ export function BlogSection({ posts }: BlogSectionProps) {
             key={post.id} 
             className="group"
           >
-            <Card className="h-full flex flex-col overflow-hidden hover:shadow-md transition-shadow duration-200 border border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800">
+            <Card className="h-full flex flex-col overflow-hidden border border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800">
               {/* Simplified image container */}
               <div className="relative w-full aspect-[16/9] overflow-hidden">
                 {post.cover_image_url ? (

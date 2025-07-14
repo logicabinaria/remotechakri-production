@@ -45,7 +45,7 @@ export default async function JobTypesPage() {
               href={`/job-types/${jobType.slug}`}
               className="group"
             >
-              <Card className="h-full transition-all hover:border-primary hover:shadow-md">
+              <Card hoverable={true} className="h-full transition-all hover:border-primary hover:shadow-md">
                 <CardContent className="p-6 flex flex-col items-center text-center">
                   <div className="bg-primary/10 p-3 rounded-full mb-4 group-hover:bg-primary/20 transition-colors">
                     <Clock className="h-6 w-6 text-primary" />
